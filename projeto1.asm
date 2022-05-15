@@ -9,8 +9,7 @@
 .balign 4
     intToPrint: .asciz "%i"
 .balign 4 
-    stringToCompare : .asciz "Hello World"
-
+    stringToCompare : .asciz "Hello Wfrld"
 .balign 4
     stringMemChrFill: .fill 50, 1, 0
 .balign 4
@@ -59,7 +58,7 @@ main:
 
     //--------------STRCMP
     LDR R1, =str
-    LDR R5, =charToSearch
+    LDR R5, =stringToCompare
     MOV R0, #0
     BL _strcmp
 
@@ -159,17 +158,37 @@ _charat:
 
 _strcmp: 
     PUSH {LR}
-    MOV R4, #0
+    LDR R1, =stringToCompare
     BL _strlen
+    MOV R6, R2//STR2
+    LDR R1, =str
+    BL _strlen
+    MOV R3, R2//STR1
+    CMP R3, R6
+    MOVNE R0, #3//STRINGS TAMANHOS DIFERENTES
+    //MOV R0, R6
+    POP {LR}
+    BXNE LR
+    PUSH {LR}
+    MOV R4, #0
     iterate_cmp_loop:
-        LDRB R3, [R1, R4]
+        LDR R1, =str
+        LDR R5, =stringToCompare
         LDRB R6, [R5, R4]
+        LDRB R3, [R1, R4]
         ADD R4, R4, #1
         CMP R3, R6 
         BEQ iterate_cmp_loop
-        //CMP R3, R6
-        //MOVNE R0, #2
-        MOV R0, R2
+        BL _strlen
+        SUB R4, #1
+        MOV R0, R4
+        /*CMP R4, R2
+        MOVEQ R0, #1//STRINGS IGUAIS
+        CMP R4, R2
+        MOVNE R0, #2//STRINGS DIFERENTES
+        //MOV R0, R4
+        */
+        
     POP {LR}
     BX LR
 
