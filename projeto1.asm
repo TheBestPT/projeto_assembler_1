@@ -9,7 +9,7 @@
 .balign 4
     intToPrint: .asciz "%i"
 .balign 4 
-    stringToCompare : .asciz "Hello Wfrld"
+    stringToCompare : .asciz "Hello Wfrl   d"
 .balign 4
     stringMemChrFill: .fill 50, 1, 0
 .balign 4
@@ -60,8 +60,10 @@ main:
     LDR R1, =str
     LDR R5, =stringToCompare
     MOV R0, #0
+    //BL _printString
     BL _strcmp
-
+    //BL _testfunc
+    
     //--------------- MEMCHR
     /*LDR R1, =str
     LDR R5, =stringMemChrFill
@@ -171,27 +173,49 @@ _strcmp:
     BXNE LR
     PUSH {LR}
     MOV R4, #0
+    LDR R1, =str
+    LDR R5, =stringToCompare
     iterate_cmp_loop:
-        LDR R1, =str
-        LDR R5, =stringToCompare
-        LDRB R6, [R5, R4]
-        LDRB R3, [R1, R4]
-        ADD R4, R4, #1
-        CMP R3, R6 
+        CMP R2, R4
+        BEQ _end_strcmp
+        POP {LR}
+        BXEQ LR
+        PUSH {LR}
+        LDRB R6, [R1, R4]
+        LDRB R3, [R5, R4]
+        CMP R6, R3 
+        ADDEQ R4, R4, #1
         BEQ iterate_cmp_loop
-        BL _strlen
-        SUB R4, #1
-        MOV R0, R4
-        /*CMP R4, R2
-        MOVEQ R0, #1//STRINGS IGUAIS
-        CMP R4, R2
-        MOVNE R0, #2//STRINGS DIFERENTES
-        //MOV R0, R4
-        */
-        
+        MOV R0, #2
     POP {LR}
     BX LR
 
+_testfunc:
+    PUSH {LR}
+    BL _strlen
+    MOV R4, #0
+
+    testfun_loop:
+        CMP R2, R4
+        BEQ _end_strcmp
+        POP {LR}
+        BXEQ LR
+        PUSH {LR}
+        LDR R1, =str
+        LDR R5, =stringToCompare
+        LDRB R6, [R1, R4]
+        LDRB R3, [R5, R4]
+        CMP R6, R3 
+        ADDEQ R4, R4, #1
+        BEQ testfun_loop
+        MOV R0, #2
+    //MOV R0, R4    
+    POP {LR}
+BX LR
+
+_end_strcmp:
+    MOV R0, #1
+BX LR
 
 _memchr:
     PUSH {LR}
