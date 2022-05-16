@@ -5,11 +5,11 @@
 .balign 4
     stringOut: .fill 50, 1, 0
 .balign 4
-    charToSearch: .asciz "d"
+    charToSearch: .asciz "l"
 .balign 4
     intToPrint: .asciz "%i"
 .balign 4 
-    stringToCompare : .asciz "Hello Wfrl   d"
+    stringToCompare : .asciz "Hello World"
 .balign 4
     stringMemChrFill: .fill 50, 1, 0
 .balign 4
@@ -19,7 +19,14 @@
 .balign 4
     stringStrCat: .asciz "tudo bem?"
 .balign 4
-    empetyStr: .asciz ""    
+    empetyStr: .asciz "" 
+.balign 4
+    fillString: .space 50
+.balign 4
+    lowercasestr: .asciz "hello world"
+.balign 4
+    stringToSaveUpperCase: .fill 50, 1, 1
+   
 
 
 .global printf
@@ -57,12 +64,11 @@ main:
     //BL _printString
 
     //--------------STRCMP
-    LDR R1, =str
+    /*LDR R1, =str
     LDR R5, =stringToCompare
     MOV R0, #0
     //BL _printString
-    BL _strcmp
-    //BL _testfunc
+    BL _strcmp*/
     
     //--------------- MEMCHR
     /*LDR R1, =str
@@ -76,9 +82,11 @@ main:
     BL _printString*/
 
     //--------------------- MEMMOVE
-    /*LDR R1, =str
-    LDR R5, =stringMemMove
+    
+    /*LDR R1, =stringMemMove
     BL _strlen
+    MOV R5, R1
+    LDR R1, =str
     BL _memmove
     //LDR R0, =str
     BL _printString*/
@@ -109,6 +117,38 @@ main:
     BL _strcpy
     //LDR R0, =str
     BL _printString*/
+
+    //------------------ STRCSPN
+    /*LDR R1, =str
+    LDR R3, =stringMemMove
+    BL _strcspn*/
+
+
+    //----------------- LASTCHARAT
+    /*LDR R1, =str
+    LDR R2, =charToSearch
+    BL _lastcharat*/
+
+
+    //------------------- strxfrm
+
+    /*LDR R1, =stringMemMove
+    LDR R5, =str
+    MOV R0, #3
+    BL _strxfrm
+    //LDR R0, =str
+    BL _printString*/
+
+
+    //-------------------- UPPERCASE
+
+    //LDR R1, =lowercasestr
+    LDR R1, =lowercasestr
+    LDR R3, =stringToSaveUpperCase
+    BL _strlen
+    BL _uppercase
+    MOV R1, R0
+    //BL _printString
     
 
     B _exit
@@ -283,7 +323,7 @@ _memmove:
         ADD R4, #1
         CMP R4, R2
         BNE memmove_loop
-        MOV R0, R5
+        MOV R0, R1
     BX LR
 
 
@@ -338,6 +378,54 @@ _strcpy:
         MOV R0, R1*/
     BX LR
 
-_strcspn:
+
+
+
+_lastcharat:
+    MOV R4, #0//iterador
+
+    lastcharat_loop:
+        LDRB R3, [R1, R4]//ler a string onde vai ser pesquisado o charter
+        LDRB R6, [R2, #0]//o carater
+        ADD R4, R4, #1//incrementar
+        CMP R3, R6//comparar ate encontrar igual
+        MOVEQ R5, R4
+        CMP R3, #0
+        BNE lastcharat_loop
+        SUB R5, #1
+        MOV R0, R5//retornar a posicao
+    BX LR
+
+
+_strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de replace
+    MOV R4, #0//Iterador
+
+    strxfrm_loop:
+        LDRB R3, [R5, R4]
+        STRB R3, [R1, R4]
+        ADD R4, #1
+        CMP R4, R0
+        BNE strxfrm_loop
+        MOV R0, R1
+    BX LR
+
+_uppercase:
+    MOV R4, #0
+    MOV R0, R2
+    BX LR
+    uppercase_loop:
+        LDRB R5, [R3, R4]
+        LDRB R6, [R1, R4]
+        SUB R6, #32//TRANSFORMAR EM UPPERCASE
+        STRB R6, [R3, R4]
+        ADD R4, #1
+        CMP R4, R2
+        BNE uppercase_loop
+        MOV R0, R3
+BX LR
+
+
+_strcspn://R1 STR1 R3 STR 2
+
 
     BX LR
