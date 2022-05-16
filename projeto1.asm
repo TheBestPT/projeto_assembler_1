@@ -25,7 +25,9 @@
 .balign 4
     lowercasestr: .asciz "hello world"
 .balign 4
-    stringToSaveUpperCase: .fill 50, 1, 1
+    uppercasestr: .asciz "HELLO WORLD"
+.balign 4
+    stringToSaveUpperCase: .fill 50, 1, 0
    
 
 
@@ -143,12 +145,19 @@ main:
     //-------------------- UPPERCASE
 
     //LDR R1, =lowercasestr
-    LDR R1, =lowercasestr
-    LDR R3, =stringToSaveUpperCase
+    /*LDR R1, =lowercasestr
     BL _strlen
+    LDR R3, =stringToSaveUpperCase
     BL _uppercase
     MOV R1, R0
-    //BL _printString
+    BL _printString*/
+
+    LDR R1, =uppercasestr
+    BL _strlen
+    LDR R3, =stringToSaveUpperCase
+    BL _lowercase
+    MOV R1, R0
+    BL _printString
     
 
     B _exit
@@ -411,16 +420,31 @@ _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de 
 
 _uppercase:
     MOV R4, #0
-    MOV R0, R2
-    BX LR
+    SUB R2, #1
     uppercase_loop:
         LDRB R5, [R3, R4]
-        LDRB R6, [R1, R4]
-        SUB R6, #32//TRANSFORMAR EM UPPERCASE
+        LDRB R6, [R1, R4] 
+        CMP R6, #32//ESPAÇO
+        SUBNE R6, #32//TRANSFORMAR EM UPPERCASE
         STRB R6, [R3, R4]
-        ADD R4, #1
         CMP R4, R2
+        ADDNE R4, #1
         BNE uppercase_loop
+        MOV R0, R3
+BX LR
+
+_lowercase:
+    MOV R4, #0
+    SUB R2, #1
+    lowercase_loop:
+        LDRB R5, [R3, R4]
+        LDRB R6, [R1, R4]
+        CMP R6, #32//ESPAÇO
+        ADDNE R6, #32//TRANSFORMAR EM UPPERCASE
+        STRB R6, [R3, R4]
+        CMP R4, R2
+        ADDNE R4, #1
+        BNE lowercase_loop
         MOV R0, R3
 BX LR
 
