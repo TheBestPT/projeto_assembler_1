@@ -30,7 +30,8 @@
     stringToSaveUpperCase: .fill 50, 1, 0
 .balign 4
     stringCatWithFill: .fill 50, 1, 0
-   
+.balign 4
+    bigStr: .asciz "Ola tudo bem isto é uma string de testes"
 
 
 .global printf
@@ -91,7 +92,7 @@ main:
     BL _strlen
     MOV R5, R1
     LDR R1, =str
-    BL _memmove
+    BL _memmove//R1 str R5 stringMemMove
     //LDR R0, =str
     BL _printString*/
 
@@ -104,7 +105,7 @@ main:
 
     //----------------------- STRCAT
 
-    LDR R1, =stringMemMove
+    /*LDR R1, =stringMemMove
     BL _strlen
     MOV R5, R1
     LDR R1, =stringCatWithFill
@@ -119,7 +120,7 @@ main:
     LDR R1, =stringStrCat
     //MOV R6, R2
     BL _strcat
-    BL _printString
+    BL _printString*/
 
     //------------------ STRCPY
 
@@ -145,12 +146,13 @@ main:
 
     //------------------- strxfrm
 
-    /*LDR R1, =stringMemMove
+    //LDR R1, =stringMemMove
+    LDR R1, =stringCatWithFill
     LDR R5, =str
     MOV R0, #3
     BL _strxfrm
     //LDR R0, =str
-    BL _printString*/
+    BL _printString
 
 
     //-------------------- UPPERCASE
@@ -442,6 +444,7 @@ _lastcharat:
 
 
 _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de replace
+    PUSH {LR}
     MOV R4, #0//Iterador
 
     strxfrm_loop:
@@ -451,6 +454,10 @@ _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de 
         CMP R4, R0
         BNE strxfrm_loop
         MOV R0, R1
+        MOV R1, R5
+        BL _strlen
+        MOV R3, R2
+    POP {LR}
     BX LR
 
 _uppercase:

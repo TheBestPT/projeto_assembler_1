@@ -12,7 +12,7 @@ Numero de metodos
 8 - strconcat //concatenar strings
 9 - strcpy (verificar o resto dos carateres)
 10 - lastcharat // basciamente e um charat mas em vez da primeira ocorrencia e da ultima
-11 - strxfrm (TENS DE VERIFICAR ESTE METODO)
+11 - strxfrm //Basicamente o mesmo que memmove mas este ainda devolve o tamanho da string
 //TENTA VER A CENA DE QUE SE TIVERES A DIMINUIR A LETRA SE ELA JA ESTIVER NAO DIMINUAS
 12 - uppercase //transforma uma string de carateres em minuscula para maiuscula
 13 - lowercase //O mesmo da de cima mas ao contrario
