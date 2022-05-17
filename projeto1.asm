@@ -152,13 +152,34 @@ main:
     MOV R1, R0
     BL _printString*/
 
-    LDR R1, =uppercasestr
+    //-------------------- LOWERCASE
+
+    /*LDR R1, =uppercasestr
     BL _strlen
     LDR R3, =stringToSaveUpperCase
     BL _lowercase
     MOV R1, R0
-    BL _printString
-    
+    BL _printString*/
+
+
+    //----------------- STRSET
+
+    //LDR R1, =charToSearch
+    /*LDR R1, =str
+    BL _strlen
+    LDR R1, =charToSearch
+    LDR R3, =str
+    BL _strset
+    BL _printString*/
+
+    //----------------- MEMCMP
+    LDR R1, =str
+    LDR R5, =stringToCompare
+    MOV R0, #0
+    MOV R7, #4
+    //BL _printString
+    BL _memcmp
+    MOV R7, #0
 
     B _exit
     
@@ -448,8 +469,52 @@ _lowercase:
         MOV R0, R3
 BX LR
 
+_strset:
+    MOV R4, #0//Iterador
+
+    strset_loop:
+        LDRB R5, [R1, #0]
+        STRB R5, [R3, R4]
+        ADD R4, #1
+        CMP R4, R2//R2 ate onde substituir
+        BNE strset_loop
+        MOV R0, R3
+    BX LR
+
+_memcmp: 
+    PUSH {LR}
+    LDR R1, =stringToCompare
+    BL _strlen
+    MOV R6, R2//STR2
+    LDR R1, =str
+    BL _strlen
+    MOV R3, R2//STR1
+    CMP R3, R6
+    MOVNE R0, #3//STRINGS TAMANHOS DIFERENTES
+    //MOV R0, R6
+    POP {LR}
+    BXNE LR
+    PUSH {LR}
+    MOV R4, #0
+    LDR R1, =str
+    LDR R5, =stringToCompare
+    memcmp_loop:
+        CMP R7, R4
+        BEQ _end_strcmp
+        POP {LR}
+        BXEQ LR
+        PUSH {LR}
+        LDRB R6, [R1, R4]
+        LDRB R3, [R5, R4]
+        CMP R6, R3 
+        ADDEQ R4, R4, #1
+        BEQ memcmp_loop
+        MOV R0, #2
+    POP {LR}
+    BX LR
 
 _strcspn://R1 STR1 R3 STR 2
 
 
     BX LR
+
