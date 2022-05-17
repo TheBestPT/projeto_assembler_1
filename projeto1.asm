@@ -15,7 +15,7 @@
 .balign 4
     stringMemMove: .asciz "O francisco"
 .balign 4
-    stringWithLength : .asciz "Ola                     "
+    stringWithLength : .asciz "Ola"
 .balign 4
     stringStrCat: .asciz "tudo bem?"
 .balign 4
@@ -28,6 +28,8 @@
     uppercasestr: .asciz "HELLO WORLD"
 .balign 4
     stringToSaveUpperCase: .fill 50, 1, 0
+.balign 4
+    stringCatWithFill: .fill 50, 1, 0
    
 
 
@@ -102,13 +104,22 @@ main:
 
     //----------------------- STRCAT
 
-    
-    /*LDR R1, =stringStrCat
-    LDR R5, =stringWithLength
+    LDR R1, =stringMemMove
     BL _strlen
+    MOV R5, R1
+    LDR R1, =stringCatWithFill
+    BL _memmove
+    //LDR R0, =str
+    //BL _printString
+
+    //LDR R1, =stringStrCat
+    MOV R1, R0
+    BL _strlen
+    MOV R5, R1
+    LDR R1, =stringStrCat
     //MOV R6, R2
     BL _strcat
-    BL _printString*/
+    BL _printString
 
     //------------------ STRCPY
 
@@ -173,13 +184,13 @@ main:
     BL _printString*/
 
     //----------------- MEMCMP
-    LDR R1, =str
+    /*LDR R1, =str
     LDR R5, =stringToCompare
     MOV R0, #0
     MOV R7, #4
     //BL _printString
     BL _memcmp
-    MOV R7, #0
+    MOV R7, #0*/
 
     B _exit
     
@@ -346,7 +357,6 @@ _printString:
 
 _memmove:
     MOV R4, #0//Iterador
-
     memmove_loop:
         LDRB R3, [R5, R4]
         STRB R3, [R1, R4]
@@ -373,13 +383,17 @@ _memset:
 _strcat:
     PUSH {LR}
     MOV R4, R2//Iterador
-    MOV R4, #4    
+    //MOV R4, #4    
     MOV R0, #0
+    MOV R1, R5
+    mov R6, R4
     BL _strlen
+    MOV R4, R6
+    LDR R1, =stringStrCat
     MOV R6, R2
     strcat_loop:
-        LDRB R3, [R1, R0]//tudo bem?
-        STRB R3, [R5, R4]//ola
+        LDRB R3, [R1, R0]//o Francisco
+        STRB R3, [R5, R4]//tudo bem?
         ADD R4, #1
         ADD R0, #1
         CMP R0, R6//R2 ate onde substituir
