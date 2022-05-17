@@ -1,0 +1,20 @@
+Objetivos projeto
+
+Numero de metodos 
+
+1 - string length  //Tamanho da string
+2 - invert string //Inverter string
+3 - char at //procurar a primeira ocrrencia de um carater
+4 - memchr //basicamente um substring sem limite final 
+5 - memmove //mover uma str1 para str2
+6 - strcmp //comparar strings, retorna 3 se as strings tiverem diferentes tamanhos 2 se forem diferentes 1 se forem igauis
+7 - memset //substitui na str1 por um carater a escolha ate um limite dado
+8 - strconcat //concatenar strings
+9 - strcpy (verificar o resto dos carateres)
+10 - lastcharat // basciamente e um charat mas em vez da primeira ocorrencia e da ultima
+11 - strxfrm (TENS DE VERIFICAR ESTE METODO)
+//TENTA VER A CENA DE QUE SE TIVERES A DIMINUIR A LETRA SE ELA JA ESTIVER NAO DIMINUAS
+12 - uppercase //transforma uma string de carateres em minuscula para maiuscula
+13 - lowercase //O mesmo da de cima mas ao contrario
+14 - strset //Substitui tudo na str1 com um carater a escolha
+15 - memcmp //O mesmo que o strcmp mas em vez de comparar a string toda so ate um limite n
