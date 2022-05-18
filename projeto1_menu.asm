@@ -134,6 +134,43 @@ STRXFRM VARIABLES
     insertStringSecondStrXfrm: .fill 100, 1, 0
 .balign 4
     insertIntLimiterStrXfrm: .fill 50, 1, 0
+.balign 4
+    resultStrXfrm: .asciz "Resultado: '%s', e o tamanho da primeira string enviada é de: %d\n"
+
+/*
+LASTCHARAT VARIABLES
+ */
+.balign 4
+    insertStringSearchLastCharAt: .fill 100, 1, 0
+.balign 4
+    insertCharLastCharAt: .fill 1, 1, 0
+.balign 4
+    resultLastCharAt: .asciz "O carater foi encontrado pela última vez na posição: %d \n"
+
+/*
+UPPERCASE VARIABLES
+ */
+.balign 4
+    insertStringUpperCase: .fill 100, 1, 0
+.balign 4
+    stringToSaveUpperCase: .fill 100, 1, 0
+.balign 4
+    resultUpperCase: .asciz "String em maiúscula: %s\n"
+
+/*
+LOWERCASE VARIABLES
+ */
+.balign 4
+    insertStringLowerCase: .fill 100, 1, 0
+.balign 4
+    stringToSaveLowerCase: .fill 100, 1, 0
+.balign 4
+    resultLowerCase: .asciz "String em minúscula: %s\n"
+
+/*
+STRSET VARIABLES
+ */
+
 
 @External C functions
 
@@ -209,10 +246,24 @@ main:
 
 
 
-
+    //---------- LASTCHARAT
+    CMP R0, #10
+    BLEQ _callLastCharAt
 
 
     //---------- STRXFRM
+    CMP R0, #11
+    BLEQ _callStrXfrm
+
+
+    //-------- UPPERCASE
+    CMP R0, #12
+    BLEQ _callUpperCase
+
+
+    //-------- LOWERCASE
+    CMP R0, #13
+    BLEQ _callLowerCase
 
 
 
@@ -523,7 +574,7 @@ _callStrXfrm:
     LDR R1, =insertStringSecondStrXfrm
     BL scanf
 
-    LDR R0, =scanInputInt
+    LDR R0, =insertInt
     BL printf
 
     LDR R0, =scanInputInt
@@ -531,20 +582,81 @@ _callStrXfrm:
     BL scanf
 
     LDR R1, =insertStringFirstStrXfrm
-    LDR R5, =insertStringSecondStrXfrm
-    LDR R6, =insertIntLimiterStrXfrm
-    LDRB R6, [R6, #0]
+    LDR R3, =insertStringSecondStrXfrm
+    LDR R2, =insertIntLimiterStrXfrm
+    LDRB R2, [R2, #0]
     BL _strxfrm
+    MOV R1, R0
+    LDR R0, =resultStrXfrm
+    MOV R2, R3
     BL printf
     
     POP {R0, LR}
 BX LR
-/*LDR R1, =stringCatWithFill
-    LDR R5, =str
-    MOV R0, #3
-    BL _strxfrm
-    //LDR R0, =str
-    BL _printString*/
+
+
+_callLastCharAt:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringSearchLastCharAt
+    BL scanf
+
+    LDR R0, =insertChar
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertCharLastCharAt
+    BL scanf
+
+    LDR R1, =insertStringSearchLastCharAt
+    LDR R2, =insertCharLastCharAt
+    BL _lastcharat
+    MOV R1, R0
+    LDR R0, =resultLastCharAt
+    BL printf
+    POP {R0, LR}
+BX LR
+
+_callUpperCase:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringUpperCase
+    BL scanf
+
+    LDR R1, =insertStringUpperCase
+    BL _strlen
+    LDR R3, =stringToSaveUpperCase
+    BL _uppercase
+    MOV R1, R0
+    LDR R0, =resultUpperCase
+    BL printf
+    POP {R0, LR}
+BX LR 
+
+_callLowerCase:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringLowerCase
+    BL scanf
+
+    LDR R1, =insertStringLowerCase
+    BL _strlen
+    LDR R3, =stringToSaveLowerCase
+    BL _lowercase
+    MOV R1, R0
+    LDR R0, =resultLowerCase
+    BL printf
+    POP {R0, LR}
+BX LR 
 
 //---------------------------------------------------------------------------------------------
 
@@ -758,8 +870,30 @@ BX LR
 
 /*
     Parametros:
+    R1 - string onde vai ser pesquisado o carater
+    R2 - o carater
+    Return
+    R0 - posição da ultima vez que encontrou o carater
+ */
+_lastcharat:
+    MOV R4, #0//iterador
+
+    lastcharat_loop:
+        LDRB R3, [R1, R4]//ler a string onde vai ser pesquisado o charter
+        LDRB R6, [R2, #0]//o carater
+        ADD R4, R4, #1//incrementar
+        CMP R3, R6//comparar ate encontrar igual
+        MOVEQ R5, R4
+        CMP R3, #0
+        BNE lastcharat_loop
+        SUB R5, #1
+        MOV R0, R5//retornar a posicao
+    BX LR
+
+/*
+    Parametros:
     R1 - string a ser replaced
-    R5 - string que vai ser replaced R0 limite de replace
+    R3 - string que vai ser replaced R0 limite de replace
     Return:
     R0 - limite de replace
     R3 - tamanho da string R5
@@ -769,16 +903,58 @@ _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de 
     MOV R4, #0//Iterador
 
     strxfrm_loop:
-        LDRB R3, [R5, R4]
-        STRB R3, [R1, R4]
+        LDRB R5, [R3, R4]
+        STRB R5, [R1, R4]
         ADD R4, #1
-        CMP R4, R0
+        CMP R4, R2
         BNE strxfrm_loop
         MOV R0, R1
-        MOV R1, R5
+        MOV R1, R3
         BL _strlen
         MOV R3, R2
     POP {LR}
     BX LR
 
+/*
+    Parametros:
+    R1 - string em lowercase
+    R3 - string vazia para guardar a conversao
+    Return 
+    R0 - string em uppercase
+ */
+_uppercase:
+    MOV R4, #0
+    SUB R2, #1
+    uppercase_loop:
+        LDRB R5, [R3, R4]
+        LDRB R6, [R1, R4] 
+        CMP R6, #32//ESPAÇO
+        SUBNE R6, #32//TRANSFORMAR EM UPPERCASE
+        STRB R6, [R3, R4]
+        CMP R4, R2
+        ADDNE R4, #1
+        BNE uppercase_loop
+        MOV R0, R3
+BX LR
 
+/*
+    Parametros:
+    R1 - string em uppercase
+    R3 - string vazia para guardar a conversao
+    Return 
+    R0 - string em lowercase
+ */
+_lowercase:
+    MOV R4, #0
+    SUB R2, #1
+    lowercase_loop:
+        LDRB R5, [R3, R4]
+        LDRB R6, [R1, R4]
+        CMP R6, #32//ESPAÇO
+        ADDNE R6, #32//TRANSFORMAR EM UPPERCASE
+        STRB R6, [R3, R4]
+        CMP R4, R2
+        ADDNE R4, #1
+        BNE lowercase_loop
+        MOV R0, R3
+BX LR
