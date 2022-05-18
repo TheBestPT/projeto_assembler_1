@@ -16,6 +16,8 @@
     insertString: .asciz "Insira uma string: "
 .balign 4
     insertChar: .asciz "Insira um char: "
+.balign 4
+    insertInt: .asciz "Insira um inteiro: "
 .balign
     mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - char at\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - lastcharat\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n\nEscolha uma opção: "
 
@@ -84,6 +86,48 @@ STRCMP VARIABLES
     insertStringPrimaryToCompare: .fill 100, 1, 0
 .balign 4
     insertStringSecundaryToCompare: .fill 100, 1, 0
+.balign 4
+    messageEqualsStrings: .asciz "As strings são iguais!"
+.balign 4
+    messageDiferentStrings: .asciz "As strings são diferentes!"
+.balign 4
+    messageDifLengthStrings: .asciz "As strings têm tamanhos diferentes logo são diferentes!"    
+.balign 4
+    resultStrcmp: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais"
+
+/*
+MEMSET VARIABLES
+ */
+.balign 4
+    insertStringMemSet: .fill 100, 1, 0
+.balign 4
+    insertCharMemSet: .fill 100, 1, 0
+.balign 4
+    insertIntMemSet: .fill 50, 1, 0
+
+/*
+STRCAT VARIABLES
+ */
+.balign 4
+    insertStringFirstStrCat: .fill 100, 1, 0
+.balign 4
+    insertStringSecondeStrCat: .fill 100, 1, 0
+.balign 4
+    empetyStringStrCat: .fill 100, 1, 0
+
+/*
+STRCPY VARIABLES
+ */
+.balign 4
+    insertStringFirstStrCpy: .fill 100, 1, 0
+.balign 4
+    insertStringSecondStrCpy: .fill 100, 1, 0
+.balign 4
+    insertIntLimiterStrCpy: .fill 50, 1, 0
+
+/*
+STRXFRM VARIABLES
+ */
 
 
 
@@ -139,6 +183,25 @@ main:
     CMP R0, #5
     BLEQ _callMemMove
 
+    //---------- STRCMP
+
+    CMP R0, #6
+    BLEQ _callStrCmp
+    MOVEQ R0, #6//NAO POSSO GUARDAR NA STACK DEVIDO A TER CONFLITO NO METODO STRCMP
+
+    //-------- MEMSET
+
+    CMP R0, #7
+    BLEQ _callMemSet
+
+    //------- STRCAT
+
+    CMP R0, #8
+    BLEQ _callStrCat
+
+    //-------- STRCPY
+    CMP R0, #9
+    BLEQ _callStrCpy
 
 
     POP {LR}
@@ -301,28 +364,146 @@ _callMemMove:
     LDR R3, =insertStringToMoveMemMove
     BL _memmove
     BL printf
-
-    /*LDR R1, =stringMemMove//String a ser movida
-    BL _strlen
-    MOV R5, R1
-    LDR R1, =str//String que vai ser replaced
-    BL _memmove//R1 str R5 stringMemMove
-    //LDR R0, =str
-    BL _printString*/
     POP {R0, LR}
 BX LR
 
 _callStrCmp:
+    PUSH {LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringPrimaryToCompare
+    BL scanf
+
+    LDR R0, =insertString
+    BL printf
+    LDR R0, =scanInputString
+    LDR R1, =insertStringSecundaryToCompare
+    BL scanf
+
+    LDR R1, =insertStringPrimaryToCompare
+    LDR R5, =insertStringSecundaryToCompare
+    MOV R0, #0
+    BL _strcmp
+    MOV R1, R0
+    LDR R0, =resultStrcmp
+    BL printf
+
+    POP {LR}
+BX LR 
+
+_callMemSet:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringMemSet
+    BL scanf
+
+    LDR R0, =insertChar
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertCharMemSet
+    BL scanf
+
+    LDR R0, =insertInt
+    BL printf
+
+    LDR R0, =scanInputInt
+    LDR R1, =insertIntMemSet
+    BL scanf
+
+    LDR R1, =insertCharMemSet
+    LDR R2, =insertIntMemSet
+    LDRB R2, [R2, #0]
+    LDR R3, =insertStringMemChr
+    BL _memset
+    BL printf
+    POP {R0, LR}
+BX LR
+
+
+_callStrCat:
     PUSH {R0, LR}
 
-    LDR R1, =str
-    LDR R5, =stringToCompare
-    MOV R0, #0
-    //BL _printString
-    BL _strcmp
+    LDR R0, =insertString
+    BL printf
 
+    LDR R0, =scanInputString
+    LDR R1, =insertStringFirstStrCat
+    BL scanf
+
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringSecondeStrCat
+    BL scanf
+
+    LDR R1, =insertStringFirstStrCat
+    BL _strlen
+    LDR R1, =empetyStringStrCat
+    LDR R3, =insertStringFirstStrCat
+    BL _memmove
+    
+    MOV R1, R0
+    BL _strlen
+    MOV R5, R1
+    LDR R1, =insertStringSecondeStrCat
+    BL _strcat
+    BL printf
     POP {R0, LR}
-BX LR 
+BX LR
+
+
+_callStrCpy:
+    PUSH {RO, LR}
+
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringFirstStrCpy
+    BL scanf 
+
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringSecondStrCpy
+    BL scanf 
+    
+    LDR R0, =insertInt
+    BL printf
+
+    LDR R0, =scanInputInt
+    LDR R1, =insertIntLimiterStrCpy
+    BL scanf
+    
+    LDR R1, =insertStringSecondStrCpy
+    LDR R3, =insertStringFirstStrCpy
+    LDR R2, =insertIntLimiterStrCpy
+    LDRB R2, [R2, #0]
+    BL _strcpy
+    //LDR R0, =insertStringSecondStrCpy
+    BL printf
+    POP {RO, LR}
+BX LR
+
+
+_callStrXfrm:
+    PUSH {R0, LR}   
+    LDR R1, =stringCatWithFill
+    LDR R5, =str
+    MOV R0, #3
+    BL _strxfrm
+    //LDR R0, =str
+    BL _printString
+    POP {RO, LR}
+BX LR
 
 //---------------------------------------------------------------------------------------------
 
@@ -433,10 +614,10 @@ _memmove:
 
 _strcmp: 
     PUSH {LR}
-    LDR R1, =stringToCompare
+    LDR R1, =insertStringSecundaryToCompare
     BL _strlen
     MOV R6, R2//STR2
-    LDR R1, =str
+    LDR R1, =insertStringPrimaryToCompare
     BL _strlen
     MOV R3, R2//STR1
     CMP R3, R6
@@ -446,8 +627,8 @@ _strcmp:
     BXNE LR
     PUSH {LR}
     MOV R4, #0
-    LDR R1, =str
-    LDR R3, =stringToCompare
+    LDR R1, =insertStringPrimaryToCompare
+    LDR R5, =insertStringSecundaryToCompare
     iterate_cmp_loop:
         CMP R2, R4
         BEQ _end_strcmp
@@ -455,10 +636,106 @@ _strcmp:
         BXEQ LR
         PUSH {LR}
         LDRB R6, [R1, R4]
-        LDRB R5, [R3, R4]
-        CMP R6, R5
+        LDRB R3, [R5, R4]
+        CMP R6, R3 
         ADDEQ R4, R4, #1
         BEQ iterate_cmp_loop
         MOV R0, #2
+    POP {LR}
+    BX LR
+
+_end_strcmp:
+    MOV R0, #1
+BX LR
+
+
+/*
+    Parametros:
+    R1 - carater
+    R3 - string que vai ser modificada
+    Return:
+    RO - string modificada
+ */
+_memset:
+    MOV R4, #0//Iterador
+    memset_loop:
+        LDRB R5, [R1, #0]
+        STRB R5, [R3, R4]
+        ADD R4, #1
+        CMP R4, R2//R2 ate onde substituir
+        BNE memset_loop
+        MOV R0, R3
+BX LR
+
+/*
+    Parametros:
+    R1 - primeira string
+    R5 - segunda string
+    Return
+    R0 - strinc concatenda
+ */
+_strcat:
+    PUSH {LR}
+    MOV R4, R2//Iterador
+    //MOV R4, #4    
+    MOV R0, #0
+    MOV R1, R5
+    mov R6, R4
+    BL _strlen
+    MOV R4, R6
+    LDR R1, =insertStringSecondeStrCat
+    MOV R6, R2
+    strcat_loop:
+        LDRB R3, [R1, R0]//o Francisco
+        STRB R3, [R5, R4]//tudo bem?
+        ADD R4, #1
+        ADD R0, #1
+        CMP R0, R6//R2 ate onde substituir
+        BNE strcat_loop
+        MOV R0, R5    
+    POP {LR}
+    BX LR
+
+/*
+    Parametros:
+    R3 - primeira string
+    R1 - segunda string
+    Return:
+    R0 - string copiada
+ */
+_strcpy:
+    MOV R4, #0//Iterador
+
+    strpy_loop:
+        LDRB R5, [R3, R4]
+        STRB R5, [R1, R4]
+        ADD R4, #1
+        CMP R4, R2
+        BNE strpy_loop
+        MOV R0, R1
+BX LR
+
+/*
+    Parametros:
+    R1 - string a ser replaced
+    R5 - string que vai ser replaced R0 limite de replace
+    Return:
+    R0 - limite de replace
+    R3 - tamanho da string R5
+ */
+_strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de replace
+    PUSH {LR}
+    MOV R4, #0//Iterador
+
+    strxfrm_loop:
+        LDRB R3, [R5, R4]
+        STRB R3, [R1, R4]
+        ADD R4, #1
+        CMP R4, R0
+        BNE strxfrm_loop
+        MOV R0, R1
+        MOV R1, R5
+        BL _strlen
+        MOV R3, R2
     POP {LR}
     BX LR
