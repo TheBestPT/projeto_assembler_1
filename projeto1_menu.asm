@@ -12,6 +12,10 @@
     inputOption: .fill 50, 1, 0
 .balign 4
     scanInputString: .asciz "%s"
+.balign 4
+    insertString: .asciz "Insira uma string: "
+.balign 4
+    insertChar: .asciz "Insira um char: "
 .balign
     mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - char at\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - lastcharat\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n\nEscolha uma opção: "
 
@@ -34,8 +38,6 @@ STRING LENGTH VARIABLES
     stringToLength: .fill 100, 1, 0
 .balign 4
     resultToLength: .asciz "O tamanho da sua string é de: %d%s"
-.balign 4
-    outLength: .fill 50, 1, 0
 
 /*
 CHAR AT VARIABLES
@@ -48,6 +50,42 @@ CHAR AT VARIABLES
     insertCharCharAt: .asciz "Insira um carater para ser pesquisado na string: "
 .balign 4
     insertStringCharAt: .asciz "Insira uma string: "
+.balign 4
+    resultCharAt: .asciz "O carater foi encontrado na posição: %d \n"
+
+/*
+MEMCHR VARIABLES
+ */
+
+.balign 4
+    insertCharMemChr: .fill 1, 1, 0
+.balign 4
+    insertStringMemChr: .fill 100, 1, 0
+.balign 4
+    empetyStrMemChr: .fill 100, 1, 0
+
+
+/*
+MEMMOVE VARIABLES
+ */
+.balign 4
+    insertStringToMoveMemMove: .fill 100, 1, 0
+.balign 4
+    insertStringToReplaceMemMove: .fill 100, 1, 0
+.balign 4
+    messageStringToMoveMemMove: .asciz "Insira uma string para ser movida: "
+.balign 4
+    messageStringToReplaceMemMove: .asciz "Insira uma string para ser modificada: "
+
+/*
+STRCMP VARIABLES
+ */
+.balign 4
+    insertStringPrimaryToCompare: .fill 100, 1, 0
+.balign 4
+    insertStringSecundaryToCompare: .fill 100, 1, 0
+
+
 
 @External C functions
 
@@ -91,7 +129,15 @@ main:
     CMP R0, #3
     BLEQ _callCharAt
 
+    //------------ CALL MEMCHR
 
+    CMP R0, #4
+    BLEQ _callMemChr
+
+    //---------- CALL MEMMOVE
+
+    CMP R0, #5
+    BLEQ _callMemMove
 
 
 
@@ -135,7 +181,7 @@ _exit:
     BX LR*/
 
 _callInvertString:
-    PUSH {LR}
+    PUSH {R0, LR}
     LDR R0, =insertStringInvert
     BL printf
     LDR R0, =scanInputString
@@ -149,7 +195,7 @@ _callInvertString:
     BL _invertString
     MOV R0, R1
     BL printf
-    POP {LR}
+    POP {R0, LR}
 BX LR
 
 
@@ -157,7 +203,7 @@ BX LR
 
 
 _callStringLength:
-    PUSH {LR}
+    PUSH {R0, LR}
     LDR R0, =insertStringToLength
     BL printf
     LDR R0, =scanInputString
@@ -173,17 +219,110 @@ _callStringLength:
     //MOV R0, R1
     LDR R2, =newLine
     BL printf
-    POP {LR}
+    POP {R0, LR}
 BX LR
 
 
 _callCharAt:
-    PUSH {LR}
+    PUSH {R0, LR}
+    LDR  R0, =insertChar
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =charToSearchCharAt
+    BL scanf
+
+    LDR  R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =stringToSearchCharAt
+    BL scanf
+    
     LDR R1, =stringToSearchCharAt
     LDR R3, =charToSearchCharAt
     BL _charat
-    POP {LR}
+    MOV R1, R0
+    LDR R0, =resultCharAt
+    BL printf
+    POP {R0, LR}
 BX LR
+
+_callMemChr:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringMemChr
+    BL scanf
+
+    LDR R0, =insertChar
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertCharMemChr
+    BL scanf
+
+    LDR R1, =insertStringMemChr
+    LDR R3, =insertCharMemChr
+    
+    BL _charat
+    BL _strlen
+
+    LDR R1, =insertStringMemChr
+    LDR R3, =empetyStrMemChr
+    
+    BL _memchr
+    LDR R0, =empetyStrMemChr
+    BL printf
+    POP {R0, LR}
+BX LR
+
+_callMemMove:
+    PUSH {R0, LR}
+    LDR R0, =messageStringToMoveMemMove
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringToMoveMemMove
+    BL scanf
+
+    LDR R0, =messageStringToReplaceMemMove
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringToReplaceMemMove
+    BL scanf
+
+    LDR R1, =insertStringToMoveMemMove
+    BL _strlen
+    LDR R1, =insertStringToReplaceMemMove
+    LDR R3, =insertStringToMoveMemMove
+    BL _memmove
+    BL printf
+
+    /*LDR R1, =stringMemMove//String a ser movida
+    BL _strlen
+    MOV R5, R1
+    LDR R1, =str//String que vai ser replaced
+    BL _memmove//R1 str R5 stringMemMove
+    //LDR R0, =str
+    BL _printString*/
+    POP {R0, LR}
+BX LR
+
+_callStrCmp:
+    PUSH {R0, LR}
+
+    LDR R1, =str
+    LDR R5, =stringToCompare
+    MOV R0, #0
+    //BL _printString
+    BL _strcmp
+
+    POP {R0, LR}
+BX LR 
 
 //---------------------------------------------------------------------------------------------
 
@@ -196,7 +335,7 @@ BX LR
         R0 - String a ser invertida
         R1 - String vazia    
         RETURN 
-        R1 - string invertida
+        R0 - string invertida
      */
 _invertString:
     MOV R4, #0//Iterador
@@ -247,4 +386,79 @@ _charat:
         BNE iterate_loop
         SUB R4, R4, #1
         MOV R0, R4//retornar a posicao
+    BX LR
+
+/*
+    Parametros:
+    R0 - posição do carater encontrado
+    R1 - string a ser representada
+    R3 - string vazia
+    Return:
+    R0 - string cortada
+ */
+_memchr:
+    PUSH {LR}
+    //SUB R0, #2
+    MOV R4, R0//posicao do carater encontrado
+    MOV R6, #0
+    iterate_memchr:
+        LDRB R5, [R1, R4]
+        STRB R5, [R3, R6]
+        ADD R4, #1
+        ADD R6, #1
+        CMP R4, R2
+        BNE iterate_memchr
+        MOV R0, R3
+    POP {LR}
+    BX LR
+
+/*
+    Parametros: 
+    R1 - string que vai ser substituida
+    R5 - string que vai ser movida
+    Return:
+    R0 - string movida
+*/
+_memmove:
+    MOV R4, #0//Iterador
+    memmove_loop:
+        LDRB R5, [R3, R4]
+        STRB R5, [R1, R4]
+        ADD R4, #1
+        CMP R4, R2
+        BNE memmove_loop
+        MOV R0, R1
+    BX LR
+
+
+_strcmp: 
+    PUSH {LR}
+    LDR R1, =stringToCompare
+    BL _strlen
+    MOV R6, R2//STR2
+    LDR R1, =str
+    BL _strlen
+    MOV R3, R2//STR1
+    CMP R3, R6
+    MOVNE R0, #3//STRINGS TAMANHOS DIFERENTES
+    //MOV R0, R6
+    POP {LR}
+    BXNE LR
+    PUSH {LR}
+    MOV R4, #0
+    LDR R1, =str
+    LDR R3, =stringToCompare
+    iterate_cmp_loop:
+        CMP R2, R4
+        BEQ _end_strcmp
+        POP {LR}
+        BXEQ LR
+        PUSH {LR}
+        LDRB R6, [R1, R4]
+        LDRB R5, [R3, R4]
+        CMP R6, R5
+        ADDEQ R4, R4, #1
+        BEQ iterate_cmp_loop
+        MOV R0, #2
+    POP {LR}
     BX LR
