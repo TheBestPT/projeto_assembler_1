@@ -473,7 +473,7 @@ BX LR
 
 
 _callStrCpy:
-    PUSH {LR}
+    PUSH {R0, LR}
 
     LDR R0, =insertString
     BL printf
@@ -503,7 +503,7 @@ _callStrCpy:
     BL _strcpy
     //LDR R0, =insertStringSecondStrCpy
     BL printf
-    POP {LR}
+    POP {R0, LR}
 BX LR
 
 
@@ -537,7 +537,7 @@ _callStrXfrm:
     BL _strxfrm
     BL printf
     
-    POP {LR}
+    POP {R0, LR}
 BX LR
 /*LDR R1, =stringCatWithFill
     LDR R5, =str
