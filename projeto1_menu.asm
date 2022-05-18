@@ -128,8 +128,12 @@ STRCPY VARIABLES
 /*
 STRXFRM VARIABLES
  */
-
-
+.balign 4
+    insertStringFirstStrXfrm: .fill 100, 1, 0
+.balign 4
+    insertStringSecondStrXfrm: .fill 100, 1, 0
+.balign 4
+    insertIntLimiterStrXfrm: .fill 50, 1, 0
 
 @External C functions
 
@@ -202,6 +206,14 @@ main:
     //-------- STRCPY
     CMP R0, #9
     BLEQ _callStrCpy
+
+
+
+
+
+
+    //---------- STRXFRM
+
 
 
     POP {LR}
@@ -450,6 +462,7 @@ _callStrCat:
     BL _memmove
     
     MOV R1, R0
+    //LDR R1, =insertStringSecondeStrCat
     BL _strlen
     MOV R5, R1
     LDR R1, =insertStringSecondeStrCat
@@ -460,7 +473,7 @@ BX LR
 
 
 _callStrCpy:
-    PUSH {RO, LR}
+    PUSH {LR}
 
     LDR R0, =insertString
     BL printf
@@ -490,20 +503,48 @@ _callStrCpy:
     BL _strcpy
     //LDR R0, =insertStringSecondStrCpy
     BL printf
-    POP {RO, LR}
+    POP {LR}
 BX LR
 
 
 _callStrXfrm:
     PUSH {R0, LR}   
-    LDR R1, =stringCatWithFill
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringFirstStrXfrm
+    BL scanf
+
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringSecondStrXfrm
+    BL scanf
+
+    LDR R0, =scanInputInt
+    BL printf
+
+    LDR R0, =scanInputInt
+    LDR R1, =insertIntLimiterStrXfrm
+    BL scanf
+
+    LDR R1, =insertStringFirstStrXfrm
+    LDR R5, =insertStringSecondStrXfrm
+    LDR R6, =insertIntLimiterStrXfrm
+    LDRB R6, [R6, #0]
+    BL _strxfrm
+    BL printf
+    
+    POP {LR}
+BX LR
+/*LDR R1, =stringCatWithFill
     LDR R5, =str
     MOV R0, #3
     BL _strxfrm
     //LDR R0, =str
-    BL _printString
-    POP {RO, LR}
-BX LR
+    BL _printString*/
 
 //---------------------------------------------------------------------------------------------
 
@@ -679,8 +720,8 @@ _strcat:
     MOV R4, R2//Iterador
     //MOV R4, #4    
     MOV R0, #0
-    MOV R1, R5
-    mov R6, R4
+    //MOV R1, R5
+    MOV R6, R4
     BL _strlen
     MOV R4, R6
     LDR R1, =insertStringSecondeStrCat
@@ -739,3 +780,5 @@ _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de 
         MOV R3, R2
     POP {LR}
     BX LR
+
+
