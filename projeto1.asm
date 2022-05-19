@@ -1,3 +1,15 @@
+/*
+
+
+                    AVISO CÓDIGO ESTÁTICO DE TESTES
+                    PRINTF NAO FUNCIONA ENTAO USEI O METODO COM SVC 
+                    O METODOS ESTÃO DIFERENTES MAS FAZEM O MESMO QUE OS DO MENU
+                    DESCOMENTAR CADA SEÇÃO PARA TESTAR
+                    AQUELES QUE NAO TEM PRINTLN E PRECISO FAZER ECHO $?
+                    ESTE E BASICAMENTE O CODIGO RASCUNHO PARA ELABORAÇÃO DO TRABALHO
+
+
+ */
 @Data Section
 .data
 .balign 4
@@ -43,32 +55,30 @@
 .arm
 
 main:
-    //LDR R0, =str@Ler a string
-    //LDR R1, =stringOut@Ler a string vazia
+    //---------------------- STRLEN
+    /*LDR R1, =str
+    BL _strlen*/
 
-    //MOV R1, R0//Colocar a string a ser contata em R1
-    //BL _strlen
-    
-    @ R0 -> str1 Address
-    @ R1 -> strout Address
-    @ R2 -> String length
     //---------------------- INVERT STRING
-    //BL _invertString
-    
-    //MOV R0, R1
-    //BL _printString
+    /*LDR R0, =str
+    LDR R1, =stringOut
+
+    MOV R1, R0
+    BL _strlen
+    BL _invertString
+    BL _printString*/
     
     
     //PUSH {R0, R1}
-    //----------------- CHAR AT
+    //----------------- STRCHR
     /*LDR R1, =str
     LDR R2, =charToSearch
-    BL _charat*/
+    BL _strchr*/
     //POP {R0, R1}
 
     //BL _printString
 
-    //--------------STRCMP
+    //-------------- STRCMP
     /*LDR R1, =str
     LDR R5, =stringToCompare
     MOV R0, #0
@@ -79,7 +89,7 @@ main:
     /*LDR R1, =str
     LDR R5, =stringMemChrFill
     LDR R2, =charToSearch
-    BL _charat// Return R0
+    BL _strchr// Return R0
 
     BL _strlen
     BL _memchr
@@ -129,7 +139,7 @@ main:
     LDR R5, =stringMemMove
     MOV R6, #4
     BL _strcpy
-    //LDR R0, =str
+    LDR R0, =str
     BL _printString*/
 
     //------------------ STRCSPN
@@ -147,12 +157,12 @@ main:
     //------------------- strxfrm
 
     //LDR R1, =stringMemMove
-    LDR R1, =stringCatWithFill
+    /*LDR R1, =stringCatWithFill
     LDR R5, =str
     MOV R0, #3
     BL _strxfrm
     //LDR R0, =str
-    BL _printString
+    BL _printString*/
 
 
     //-------------------- UPPERCASE
@@ -188,11 +198,14 @@ main:
     //----------------- MEMCMP
     /*LDR R1, =str
     LDR R5, =stringToCompare
-    MOV R0, #0
+    //MOV R0, #0
     MOV R7, #4
     //BL _printString
     BL _memcmp
     MOV R7, #0*/
+    
+
+
 
     B _exit
     
@@ -207,8 +220,14 @@ _exit:
     MOV R7, #1
     SVC #0 @Invoke Syscall
 
-
-_charat:
+/*
+    Parametros:
+    R1 - string onde vai ser pesquisado o carater
+    R3 - carater 
+    Retun
+    R0 - a ocorrencia do carater
+ */
+_strchr:
     MOV R4, #0//iterador
 
     iterate_loop:
@@ -221,25 +240,8 @@ _charat:
         MOV R0, R4//retornar a posicao
     BX LR
 
-/*_strcmp: 
-    PUSH {LR}
-    MOV R4, #0
-    BL _strlen
-    iterate_cmp_loop:
-        LDRB R3, [R1, R4]
-        LDRB R6, [R5, R4]
-        MOV R0, R4
-        SUB R0, R0, #1
-        CMP R2, R0
-        //BEQ _end_cmp_loop
-        MOVEQ R0, #1
-        BXEQ LR
-        ADD R4, R4, #1
-        CMP R3, R6
-        BEQ iterate_cmp_loop
-        //MOV R0, #2
-    POP {LR}
-    BX LR*/
+
+
 
 _strcmp: 
     PUSH {LR}
@@ -316,6 +318,13 @@ _memchr:
     POP {LR}
     BX LR
 
+/*
+        Parametros:
+        R0 - String a ser invertida
+        R1 - String vazia    
+        RETURN 
+        R0 - string invertida
+        */
 _invertString:
     MOV R4, #0//Iterador
 
@@ -329,7 +338,12 @@ _invertString:
         
         BX LR
     
-
+/*
+    Parametros:
+    R1 - string 
+    Return 
+    R2 - tamanho da string
+ */
 _strlen:
     MOV R4, #0//Iterador
         
@@ -534,8 +548,8 @@ _memcmp:
     POP {LR}
     BX LR
 
-_strcspn://R1 STR1 R3 STR 2
+/*_strcspn://R1 STR1 R3 STR 2
 
 
-    BX LR
+    BX LR*/
 
