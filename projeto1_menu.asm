@@ -18,6 +18,8 @@
     insertChar: .asciz "Insira um char: "
 .balign 4
     insertInt: .asciz "Insira um inteiro: "
+.balign 4
+    testInt: .asciz "%d"
 .balign
     mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - char at\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - lastcharat\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n\nEscolha uma opção: "
 
@@ -93,7 +95,7 @@ STRCMP VARIABLES
 .balign 4
     messageDifLengthStrings: .asciz "As strings têm tamanhos diferentes logo são diferentes!"    
 .balign 4
-    resultStrcmp: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais"
+    resultStrcmp: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais.\n" 
 
 /*
 MEMSET VARIABLES
@@ -187,7 +189,7 @@ MEMSET VARIABLES
 .balign 4
     insertIntLimiterMemSet: .fill 50, 1, 0
 .balign 4
-    resultMemSet: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais"
+    resultMemSet: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais\n"
 
 
 @External C functions
@@ -246,7 +248,7 @@ main:
 
     CMP R0, #6
     BLEQ _callStrCmp
-    MOVEQ R0, #6//NAO POSSO GUARDAR NA STACK DEVIDO A TER CONFLITO NO METODO STRCMP
+    //MOVEQ R0, #6//NAO POSSO GUARDAR NA STACK DEVIDO A TER CONFLITO NO METODO STRCMP
 
     //-------- MEMSET
 
@@ -455,7 +457,7 @@ _callMemMove:
 BX LR
 
 _callStrCmp:
-    PUSH {LR}
+    PUSH {R0, LR}
     LDR R0, =insertString
     BL printf
 
@@ -465,19 +467,18 @@ _callStrCmp:
 
     LDR R0, =insertString
     BL printf
+
     LDR R0, =scanInputString
     LDR R1, =insertStringSecundaryToCompare
     BL scanf
 
     LDR R1, =insertStringPrimaryToCompare
     LDR R5, =insertStringSecundaryToCompare
-    MOV R0, #0
     BL _strcmp
-    MOV R1, R0
     LDR R0, =resultStrcmp
     BL printf
 
-    POP {LR}
+    POP {R0, LR}
 BX LR 
 
 _callMemSet:
@@ -739,19 +740,11 @@ _callMemCmp:
     LDR R1, =insertStringFirstMemSet
     LDR R5, =insertStringSecondMemSet
     LDR R7, =insertIntLimiterMemSet
-    MOV R0, #0
+    LDRB R7, [R7, #0]
     BL _memcmp
-    MOV R7, #0
-    MOV R1, R0
     LDR R0, =resultMemSet
     BL printf
-    /* 
-    LDR R1, =str
-    LDR R5, =stringToCompare
-    //MOV R0, #0
-    MOV R7, #4
-    //BL _printString
-    BL _memcmp*/
+    MOV R7, #0
     POP {R0, LR}
 BX LR   
 
@@ -863,7 +856,7 @@ _memmove:
 
 
 _strcmp: 
-    PUSH {LR}
+    PUSH {R0, LR}
     LDR R1, =insertStringSecundaryToCompare
     BL _strlen
     MOV R6, R2//STR2
@@ -871,31 +864,31 @@ _strcmp:
     BL _strlen
     MOV R3, R2//STR1
     CMP R3, R6
-    MOVNE R0, #3//STRINGS TAMANHOS DIFERENTES
+    MOVNE R1, #3//STRINGS TAMANHOS DIFERENTES
     //MOV R0, R6
-    POP {LR}
+    POP {R0, LR}
     BXNE LR
-    PUSH {LR}
+    PUSH {R0, LR}
     MOV R4, #0
     LDR R1, =insertStringPrimaryToCompare
     LDR R5, =insertStringSecundaryToCompare
     iterate_cmp_loop:
         CMP R2, R4
         BEQ _end_strcmp
-        POP {LR}
+        POP {R0, LR}
         BXEQ LR
-        PUSH {LR}
+        PUSH {R0, LR}
         LDRB R6, [R1, R4]
         LDRB R3, [R5, R4]
         CMP R6, R3 
         ADDEQ R4, R4, #1
         BEQ iterate_cmp_loop
-        MOV R0, #2
-    POP {LR}
+        MOV R1, #2
+    POP {R0, LR}
     BX LR
 
 _end_strcmp:
-    MOV R0, #1
+    MOV R1, #1
 BX LR
 
 
@@ -1088,7 +1081,8 @@ _strset:
     R0 - inteiro (codigo)
  */
 _memcmp: 
-    PUSH {LR}
+    PUSH {R0, LR}
+    
     LDR R1, =insertStringSecondMemSet
     BL _strlen
     MOV R6, R2//STR2
@@ -1096,25 +1090,29 @@ _memcmp:
     BL _strlen
     MOV R3, R2//STR1
     CMP R3, R6
-    MOVNE R0, #3//STRINGS TAMANHOS DIFERENTES
+    MOVNE R1, #3//STRINGS TAMANHOS DIFERENTES
     //MOV R0, R6
-    POP {LR}
+    POP {R0, LR}
     BXNE LR
-    PUSH {LR}
+    PUSH {R0, LR}
     MOV R4, #0
     LDR R1, =insertStringFirstMemSet
     LDR R5, =insertStringSecondMemSet
     memcmp_loop:
         CMP R7, R4
-        BEQ _end_strcmp
-        POP {LR}
+        BEQ _end_strcmp_memcmp
+        POP {R0, LR}
         BXEQ LR
-        PUSH {LR}
+        PUSH {R0, LR}
         LDRB R6, [R1, R4]
         LDRB R3, [R5, R4]
         CMP R6, R3 
         ADDEQ R4, R4, #1
         BEQ memcmp_loop
-        MOV R0, #2
-    POP {LR}
+        MOV R1, #2
+    POP {R0, LR}
     BX LR
+
+_end_strcmp_memcmp:
+    MOV R1, #1
+BX LR
