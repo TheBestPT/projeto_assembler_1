@@ -170,6 +170,24 @@ LOWERCASE VARIABLES
 /*
 STRSET VARIABLES
  */
+.balign 4
+    insertCharStrSet: .fill 1, 1, 0
+.balign 4
+    insertStringStrSet: .fill 100, 1, 0
+.balign 4
+    resultStrSet: .asciz "Resultado: %s"
+
+/*
+MEMSET VARIABLES
+ */
+.balign 4
+    insertStringFirstMemSet: .fill 100, 1, 0
+.balign 4
+    insertStringSecondMemSet: .fill 100, 1, 0
+.balign 4
+    insertIntLimiterMemSet: .fill 50, 1, 0
+.balign 4
+    resultMemSet: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais"
 
 
 @External C functions
@@ -265,6 +283,12 @@ main:
     CMP R0, #13
     BLEQ _callLowerCase
 
+    //-------- STRSET
+    CMP R0, #14
+    BLEQ _callStrSet
+
+    CMP R0, #15
+    BLEQ _callMemCmp
 
 
     POP {LR}
@@ -658,6 +682,79 @@ _callLowerCase:
     POP {R0, LR}
 BX LR 
 
+
+_callStrSet:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringStrSet
+    BL scanf
+
+    LDR R0, =insertChar
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertCharStrSet
+    BL scanf
+
+    //LDR R1, =insertCharStrSet
+    LDR R1, =insertStringStrSet
+    BL _strlen
+    LDR R1, =insertCharStrSet
+    LDR R3, =insertStringStrSet
+    BL _strset
+    MOV R1, R0
+    LDR R0, =resultStrSet
+    BL printf
+    POP {R0, LR}
+BX LR
+
+
+_callMemCmp:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringFirstMemSet
+    BL scanf
+
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringSecondMemSet
+    BL scanf
+
+    LDR R0, =insertInt
+    BL printf
+
+    LDR R0, =scanInputInt
+    LDR R1, =insertIntLimiterMemSet
+    BL scanf
+
+
+    LDR R1, =insertStringFirstMemSet
+    LDR R5, =insertStringSecondMemSet
+    LDR R7, =insertIntLimiterMemSet
+    MOV R0, #0
+    BL _memcmp
+    MOV R7, #0
+    MOV R1, R0
+    LDR R0, =resultMemSet
+    BL printf
+    /* 
+    LDR R1, =str
+    LDR R5, =stringToCompare
+    //MOV R0, #0
+    MOV R7, #4
+    //BL _printString
+    BL _memcmp*/
+    POP {R0, LR}
+BX LR   
+
 //---------------------------------------------------------------------------------------------
 
 //METHODS
@@ -944,6 +1041,7 @@ BX LR
     Return 
     R0 - string em lowercase
  */
+ 
 _lowercase:
     MOV R4, #0
     SUB R2, #1
@@ -958,3 +1056,65 @@ _lowercase:
         BNE lowercase_loop
         MOV R0, R3
 BX LR
+
+
+/*
+    Parametros:
+    R1 - carater para substituir
+    R3 - string 
+
+    Return 
+    R0 - string substituida
+
+ */
+_strset:
+    MOV R4, #0//Iterador
+
+    strset_loop:
+        LDRB R5, [R1, #0]
+        STRB R5, [R3, R4]
+        ADD R4, #1
+        CMP R4, R2//R2 ate onde substituir
+        BNE strset_loop
+        MOV R0, R3
+    BX LR
+
+/*
+    Parametros: 
+    R1 - primeira string
+    R5 - sergunda string
+
+    Return
+    R0 - inteiro (codigo)
+ */
+_memcmp: 
+    PUSH {LR}
+    LDR R1, =insertStringSecondMemSet
+    BL _strlen
+    MOV R6, R2//STR2
+    LDR R1, =insertStringFirstMemSet
+    BL _strlen
+    MOV R3, R2//STR1
+    CMP R3, R6
+    MOVNE R0, #3//STRINGS TAMANHOS DIFERENTES
+    //MOV R0, R6
+    POP {LR}
+    BXNE LR
+    PUSH {LR}
+    MOV R4, #0
+    LDR R1, =insertStringFirstMemSet
+    LDR R5, =insertStringSecondMemSet
+    memcmp_loop:
+        CMP R7, R4
+        BEQ _end_strcmp
+        POP {LR}
+        BXEQ LR
+        PUSH {LR}
+        LDRB R6, [R1, R4]
+        LDRB R3, [R5, R4]
+        CMP R6, R3 
+        ADDEQ R4, R4, #1
+        BEQ memcmp_loop
+        MOV R0, #2
+    POP {LR}
+    BX LR
