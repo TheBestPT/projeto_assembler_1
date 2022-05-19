@@ -183,13 +183,13 @@ STRSET VARIABLES
 MEMSET VARIABLES
  */
 .balign 4
-    insertStringFirstMemSet: .fill 100, 1, 0
+    insertStringFirstMemCmp: .fill 100, 1, 0
 .balign 4
-    insertStringSecondMemSet: .fill 100, 1, 0
+    insertStringSecondMemCmp: .fill 100, 1, 0
 .balign 4
-    insertIntLimiterMemSet: .fill 50, 1, 0
+    insertIntLimiterMemCmp: .fill 50, 1, 0
 .balign 4
-    resultMemSet: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais\n"
+    resultMemCmp: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais\n"
 
 
 @External C functions
@@ -716,33 +716,32 @@ BX LR
 _callMemCmp:
     PUSH {R0, LR}
     LDR R0, =insertString
-    BL printf
-
+    BL printf 
     LDR R0, =scanInputString
-    LDR R1, =insertStringFirstMemSet
+    LDR R1, =insertStringFirstMemCmp
     BL scanf
 
     LDR R0, =insertString
     BL printf
 
     LDR R0, =scanInputString
-    LDR R1, =insertStringSecondMemSet
+    LDR R1, =insertStringSecondMemCmp
     BL scanf
 
     LDR R0, =insertInt
     BL printf
 
     LDR R0, =scanInputInt
-    LDR R1, =insertIntLimiterMemSet
+    LDR R1, =insertIntLimiterMemCmp
     BL scanf
 
 
-    LDR R1, =insertStringFirstMemSet
-    LDR R5, =insertStringSecondMemSet
-    LDR R7, =insertIntLimiterMemSet
+    LDR R1, =insertStringFirstMemCmp
+    LDR R5, =insertStringSecondMemCmp
+    LDR R7, =insertIntLimiterMemCmp
     LDRB R7, [R7, #0]
     BL _memcmp
-    LDR R0, =resultMemSet
+    LDR R0, =resultMemCmp
     BL printf
     MOV R7, #0
     POP {R0, LR}
@@ -854,7 +853,14 @@ _memmove:
         MOV R0, R1
     BX LR
 
+/*
+    Parametros: 
+    R1 - primeira string
+    R5 - sergunda string
 
+    Return
+    R1 - inteiro (codigo)
+ */
 _strcmp: 
     PUSH {R0, LR}
     LDR R1, =insertStringSecundaryToCompare
@@ -1074,15 +1080,15 @@ _strset:
     R5 - sergunda string
 
     Return
-    R0 - inteiro (codigo)
+    R1 - inteiro (codigo)
  */
 _memcmp: 
     PUSH {R0, LR}
     
-    LDR R1, =insertStringSecondMemSet
+    LDR R1, =insertStringSecondMemCmp
     BL _strlen
     MOV R6, R2//STR2
-    LDR R1, =insertStringFirstMemSet
+    LDR R1, =insertStringFirstMemCmp
     BL _strlen
     MOV R3, R2//STR1
     CMP R3, R6
@@ -1092,8 +1098,8 @@ _memcmp:
     BXNE LR
     PUSH {R0, LR}
     MOV R4, #0
-    LDR R1, =insertStringFirstMemSet
-    LDR R5, =insertStringSecondMemSet
+    LDR R1, =insertStringFirstMemCmp
+    LDR R5, =insertStringSecondMemCmp
     memcmp_loop:
         CMP R7, R4
         MOVEQ R1, #1
