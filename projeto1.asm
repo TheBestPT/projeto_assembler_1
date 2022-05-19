@@ -482,6 +482,8 @@ _uppercase:
         LDRB R6, [R1, R4] 
         CMP R6, #32//ESPAÇO
         SUBNE R6, #32//TRANSFORMAR EM UPPERCASE
+        CMP R6, #64
+        ADDLT R6, #32
         STRB R6, [R3, R4]
         CMP R4, R2
         ADDNE R4, #1
@@ -497,6 +499,8 @@ _lowercase:
         LDRB R6, [R1, R4]
         CMP R6, #32//ESPAÇO
         ADDNE R6, #32//TRANSFORMAR EM UPPERCASE
+        CMP R6, #123
+        SUBGT R6, #32
         STRB R6, [R3, R4]
         CMP R4, R2
         ADDNE R4, #1
