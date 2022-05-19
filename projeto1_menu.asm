@@ -874,7 +874,7 @@ _strcmp:
     LDR R5, =insertStringSecundaryToCompare
     iterate_cmp_loop:
         CMP R2, R4
-        BEQ _end_strcmp
+        MOVEQ R1, #1
         POP {R0, LR}
         BXEQ LR
         PUSH {R0, LR}
@@ -886,10 +886,6 @@ _strcmp:
         MOV R1, #2
     POP {R0, LR}
     BX LR
-
-_end_strcmp:
-    MOV R1, #1
-BX LR
 
 
 /*
@@ -1100,7 +1096,7 @@ _memcmp:
     LDR R5, =insertStringSecondMemSet
     memcmp_loop:
         CMP R7, R4
-        BEQ _end_strcmp_memcmp
+        MOVEQ R1, #1
         POP {R0, LR}
         BXEQ LR
         PUSH {R0, LR}
@@ -1112,7 +1108,3 @@ _memcmp:
         MOV R1, #2
     POP {R0, LR}
     BX LR
-
-_end_strcmp_memcmp:
-    MOV R1, #1
-BX LR
