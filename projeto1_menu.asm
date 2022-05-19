@@ -722,13 +722,14 @@ BX LR
 
 //---------------------------------------------------------------------------------------------
 
-/*
-        Parametros:
-        R0 - String a ser invertida
-        R1 - String vazia    
-        RETURN 
-        R0 - string invertida
-     */
+/*  InvertString - Inverte a string
+
+    Parametros:
+    R0 - String a ser invertida
+    R1 - String vazia    
+    RETURN 
+    R0 - string invertida
+*/
 _invertString:
     MOV R4, #0//Iterador
 
@@ -742,7 +743,8 @@ _invertString:
             MOV R0, R1    
     BX LR
 
-/*
+/*  Strlen - Diz o tamanho da string
+
     Parametros:
     R1 - string 
     Return 
@@ -760,7 +762,8 @@ _strlen:
         SUB R2, R4, #1//guarda o tamanho da string em r2
         BX LR
 
-/*
+/*  STRCHR - Damos uma string e pesquisa na string a primeira ocorrencia desse carater
+
     Parametros:
     R1 - string onde vai ser pesquisado o carater
     R3 - carater 
@@ -780,7 +783,8 @@ _strchr:
         MOV R0, R4//retornar a posicao
     BX LR
 
-/*
+/*  MEMCHR - basicamente um substring sem limite final
+
     Parametros:
     R0 - posição do carater encontrado
     R1 - string a ser representada
@@ -804,7 +808,8 @@ _memchr:
     POP {LR}
     BX LR
 
-/*
+/*  MEMMOVE - Mover str1 para str2  
+
     Parametros: 
     R1 - string que vai ser substituida
     R5 - string que vai ser movida
@@ -822,7 +827,8 @@ _memmove:
         MOV R0, R1
     BX LR
 
-/*
+/*  STRCMP - Compara str1 a str2 e devolve 1 para igausi 2 para diferentes 3 para strings de diferentes maneiras
+
     Parametros: 
     R1 - primeira string
     R5 - sergunda string
@@ -863,7 +869,8 @@ _strcmp:
     BX LR
 
 
-/*
+/*  MEMSET - substitui na str1 com a str2 ate um certo limite dado
+
     Parametros:
     R1 - carater
     R3 - string que vai ser modificada
@@ -881,13 +888,14 @@ _memset:
         MOV R0, R3
 BX LR
 
-/*
+/*  STRCAT - concatenar duas strings  
+
     Parametros:
     R1 - primeira string
     R5 - segunda string
     Return
     R0 - strinc concatenda
- */
+*/
 _strcat:
     PUSH {LR}
     MOV R4, R2//Iterador
@@ -910,7 +918,8 @@ _strcat:
     POP {LR}
     BX LR
 
-/*
+/*  STRCPY - copia str1 para str2
+
     Parametros:
     R3 - primeira string
     R1 - segunda string
@@ -929,7 +938,8 @@ _strcpy:
         MOV R0, R1
 BX LR
 
-/*
+/*  STRRCHR - Damos uma string e pesquisa na string a última ocorrencia desse carater
+
     Parametros:
     R1 - string onde vai ser pesquisado o carater
     R2 - o carater
@@ -951,7 +961,8 @@ _strrchr:
         MOV R0, R5//retornar a posicao
     BX LR
 
-/*
+/*  STRXFRM - Copia a str1 para str2 ate um certo limite e ainda devolve o tamanho da segunda str2
+
     Parametros:
     R1 - string a ser replaced
     R3 - string que vai ser replaced R0 limite de replace
@@ -976,7 +987,8 @@ _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de 
     POP {LR}
     BX LR
 
-/*
+/*  UPPERCASE - Metodo para converter string em lowercase para uppercase
+
     Parametros:
     R1 - string em lowercase
     R3 - string vazia para guardar a conversao
@@ -1000,14 +1012,14 @@ _uppercase:
         MOV R0, R3
 BX LR
 
-/*
+/*  LOWERCASE - converte uma string em uppercase em lowercase
+
     Parametros:
     R1 - string em uppercase
     R3 - string vazia para guardar a conversao
     Return 
     R0 - string em lowercase
  */
- 
 _lowercase:
     MOV R4, #0
     SUB R2, #1
@@ -1026,7 +1038,8 @@ _lowercase:
 BX LR
 
 
-/*
+/*  STRSET - Substitui todos os carateres da str1 por um carater a esolha
+
     Parametros:
     R1 - carater para substituir
     R3 - string 
@@ -1047,7 +1060,8 @@ _strset:
         MOV R0, R3
     BX LR
 
-/*
+/*  MEMCMP - O mesmo que strcmp mas em vez de comparar toda a string da se um limite ate onde comparar
+
     Parametros: 
     R1 - primeira string
     R5 - sergunda string

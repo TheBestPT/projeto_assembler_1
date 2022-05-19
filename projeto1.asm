@@ -87,11 +87,11 @@ main:
     
     //--------------- MEMCHR
     /*LDR R1, =str
-    LDR R5, =stringMemChrFill
     LDR R2, =charToSearch
     BL _strchr// Return R0
 
     BL _strlen
+    LDR R3, =stringMemChrFill
     BL _memchr
     LDR R0, =stringMemChrFill
     BL _printString*/
@@ -100,7 +100,7 @@ main:
     
     /*LDR R1, =stringMemMove
     BL _strlen
-    MOV R5, R1
+    MOV R3, R1
     LDR R1, =str
     BL _memmove//R1 str R5 stringMemMove
     //LDR R0, =str
@@ -108,7 +108,7 @@ main:
 
     //-------------------- MEMSET
     /*LDR R1, =charToSearch
-    LDR R5, =str
+    LDR R3, =str
     MOV R2, #5
     BL _memset
     BL _printString*/
@@ -136,29 +136,24 @@ main:
 
 
     /*LDR R1, =str
-    LDR R5, =stringMemMove
+    LDR R3, =stringMemMove
     MOV R6, #4
     BL _strcpy
     LDR R0, =str
     BL _printString*/
 
-    //------------------ STRCSPN
-    /*LDR R1, =str
-    LDR R3, =stringMemMove
-    BL _strcspn*/
 
-
-    //----------------- LASTCHARAT
+    //----------------- STRRCHR
     /*LDR R1, =str
     LDR R2, =charToSearch
-    BL _lastcharat*/
+    BL _strrchr*/
 
 
     //------------------- strxfrm
 
     //LDR R1, =stringMemMove
     /*LDR R1, =stringCatWithFill
-    LDR R5, =str
+    LDR R3, =str
     MOV R0, #3
     BL _strxfrm
     //LDR R0, =str
@@ -196,13 +191,13 @@ main:
     BL _printString*/
 
     //----------------- MEMCMP
-    /*LDR R1, =str
+    LDR R1, =str
     LDR R5, =stringToCompare
     //MOV R0, #0
     MOV R7, #4
     //BL _printString
     BL _memcmp
-    MOV R7, #0*/
+    MOV R7, #0
     
 
 
@@ -220,7 +215,8 @@ _exit:
     MOV R7, #1
     SVC #0 @Invoke Syscall
 
-/*
+/*  STRCHR - Damos uma string e pesquisa na string a primeira ocorrencia desse carater
+
     Parametros:
     R1 - string onde vai ser pesquisado o carater
     R3 - carater 
@@ -242,7 +238,15 @@ _strchr:
 
 
 
+/*  STRCMP - Compara str1 a str2 e devolve 1 para igausi 2 para diferentes 3 para strings de diferentes maneiras
 
+    Parametros: 
+    R1 - primeira string
+    R5 - sergunda string
+
+    Return
+    R0 - inteiro (codigo)
+ */
 _strcmp: 
     PUSH {LR}
     LDR R1, =stringToCompare
@@ -262,7 +266,7 @@ _strcmp:
     LDR R5, =stringToCompare
     iterate_cmp_loop:
         CMP R2, R4
-        BEQ _end_strcmp
+        MOVEQ R0, #1
         POP {LR}
         BXEQ LR
         PUSH {LR}
@@ -275,41 +279,24 @@ _strcmp:
     POP {LR}
     BX LR
 
-_testfunc:
-    PUSH {LR}
-    BL _strlen
-    MOV R4, #0
 
-    testfun_loop:
-        CMP R2, R4
-        BEQ _end_strcmp
-        POP {LR}
-        BXEQ LR
-        PUSH {LR}
-        LDR R1, =str
-        LDR R5, =stringToCompare
-        LDRB R6, [R1, R4]
-        LDRB R3, [R5, R4]
-        CMP R6, R3 
-        ADDEQ R4, R4, #1
-        BEQ testfun_loop
-        MOV R0, #2
-    //MOV R0, R4    
-    POP {LR}
-BX LR
 
-_end_strcmp:
-    MOV R0, #1
-BX LR
-
+/*  MEMCHR - basicamente um substring sem limite final
+    Parametros:
+    R0 - posição do carater encontrado
+    R1 - string a ser representada
+    R3 - string vazia
+    Return:
+    R0 - string cortada
+ */
 _memchr:
     PUSH {LR}
     //SUB R0, #2
     MOV R4, R0//posicao do carater encontrado
     MOV R6, #0
     iterate_memchr:
-        LDRB R3, [R1, R4]
-        STRB R3, [R5, R6]
+        LDRB R5, [R1, R4]
+        STRB R5, [R3, R6]
         ADD R4, #1
         ADD R6, #1
         CMP R4, R2
@@ -318,13 +305,14 @@ _memchr:
     POP {LR}
     BX LR
 
-/*
-        Parametros:
-        R0 - String a ser invertida
-        R1 - String vazia    
-        RETURN 
-        R0 - string invertida
-        */
+/*  InvertString - Inverte a string
+
+    Parametros:
+    R0 - String a ser invertida
+    R1 - String vazia    
+    RETURN 
+    R0 - string invertida
+*/
 _invertString:
     MOV R4, #0//Iterador
 
@@ -338,7 +326,8 @@ _invertString:
         
         BX LR
     
-/*
+/*  Strlen - Diz o tamanho da string
+
     Parametros:
     R1 - string 
     Return 
@@ -370,32 +359,54 @@ _printString:
         POP {R0, R1, LR}
         BX LR
 
+/*  MEMMOVE - Mover str1 para str2  
 
+    Parametros: 
+    R1 - string que vai ser substituida
+    R5 - string que vai ser movida
+    Return:
+    R0 - string movida
+*/
 _memmove:
     MOV R4, #0//Iterador
     memmove_loop:
-        LDRB R3, [R5, R4]
-        STRB R3, [R1, R4]
+        LDRB R5, [R3, R4]
+        STRB R5, [R1, R4]
         ADD R4, #1
         CMP R4, R2
         BNE memmove_loop
         MOV R0, R1
     BX LR
 
+/*  MEMSET - substitui na str1 com a str2 ate um certo limite dado
 
+    Parametros:
+    R1 - carater
+    R3 - string que vai ser modificada
+    Return:
+    RO - string modificada
+*/
 _memset:
     MOV R4, #0//Iterador
 
     memset_loop:
-        LDRB R3, [R1, #0]
-        STRB R3, [R5, R4]
+        LDRB R5, [R1, #0]
+        STRB R5, [R3, R4]
         ADD R4, #1
         CMP R4, R2//R2 ate onde substituir
         BNE memset_loop
-        MOV R0, R5
+        MOV R0, R3
     BX LR
 
 
+/*  STRCAT - concatenar duas strings  
+
+    Parametros:
+    R1 - primeira string
+    R5 - segunda string
+    Return
+    R0 - strinc concatenda
+ */
 _strcat:
     PUSH {LR}
     MOV R4, R2//Iterador
@@ -422,26 +433,25 @@ _strcpy:
     MOV R4, #0//Iterador
 
     strpy_loop:
-        LDRB R3, [R5, R4]
-        STRB R3, [R1, R4]
+        LDRB R5, [R3, R4]
+        STRB R5, [R1, R4]
         ADD R4, #1
         CMP R4, R6
         BNE strpy_loop
     MOV R4, R6
-    /*LDR R0, =empetyStr
-    strpy_loop_todeleterest:
-        LDRB R3, [R0, #0]
-        STRB R3, [R1, R4]
-        ADD R4, #1
-        CMP R4, R3
-        BNE strpy_loop_todeleterest    
-        MOV R0, R1*/
     BX LR
 
 
 
+/*  STRRCHR - Damos uma string e pesquisa na string a última ocorrencia desse carater
 
-_lastcharat:
+    Parametros:
+    R1 - string onde vai ser pesquisado o carater
+    R2 - o carater
+    Return
+    R0 - posição da ultima vez que encontrou o carater
+ */
+_strrchr:
     MOV R4, #0//iterador
 
     lastcharat_loop:
@@ -457,23 +467,41 @@ _lastcharat:
     BX LR
 
 
+/*  STRXFRM - Copia a str1 para str2 ate um certo limite e ainda devolve o tamanho da segunda str2
+
+    Parametros:
+    R1 - string a ser replaced
+    R3 - string que vai ser replaced R0 limite de replace
+    Return:
+    R0 - limite de replace
+    R3 - tamanho da string R5
+ */
 _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de replace
     PUSH {LR}
     MOV R4, #0//Iterador
 
     strxfrm_loop:
-        LDRB R3, [R5, R4]
-        STRB R3, [R1, R4]
+        LDRB R5, [R3, R4]
+        STRB R5, [R1, R4]
         ADD R4, #1
         CMP R4, R0
         BNE strxfrm_loop
         MOV R0, R1
-        MOV R1, R5
+        MOV R1, R3
         BL _strlen
         MOV R3, R2
     POP {LR}
     BX LR
 
+
+/*  UPPERCASE - Metodo para converter string em lowercase para uppercase
+
+    Parametros:
+    R1 - string em lowercase
+    R3 - string vazia para guardar a conversao
+    Return 
+    R0 - string em uppercase
+ */
 _uppercase:
     MOV R4, #0
     SUB R2, #1
@@ -491,6 +519,15 @@ _uppercase:
         MOV R0, R3
 BX LR
 
+
+/*  LOWERCASE - converte uma string em uppercase em lowercase
+
+    Parametros:
+    R1 - string em uppercase
+    R3 - string vazia para guardar a conversao
+    Return 
+    R0 - string em lowercase
+ */
 _lowercase:
     MOV R4, #0
     SUB R2, #1
@@ -508,6 +545,16 @@ _lowercase:
         MOV R0, R3
 BX LR
 
+/*  STRSET - Substitui todos os carateres da str1 por um carater a esolha
+
+    Parametros:
+    R1 - carater para substituir
+    R3 - string 
+
+    Return 
+    R0 - string substituida
+
+ */
 _strset:
     MOV R4, #0//Iterador
 
@@ -520,6 +567,15 @@ _strset:
         MOV R0, R3
     BX LR
 
+/*  MEMCMP - O mesmo que strcmp mas em vez de comparar toda a string da se um limite ate onde comparar
+
+    Parametros: 
+    R1 - primeira string
+    R5 - sergunda string
+
+    Return
+    R0 - inteiro (codigo)
+ */
 _memcmp: 
     PUSH {LR}
     LDR R1, =stringToCompare
@@ -539,7 +595,7 @@ _memcmp:
     LDR R5, =stringToCompare
     memcmp_loop:
         CMP R7, R4
-        BEQ _end_strcmp
+        MOVEQ R0, #1
         POP {LR}
         BXEQ LR
         PUSH {LR}
@@ -551,9 +607,4 @@ _memcmp:
         MOV R0, #2
     POP {LR}
     BX LR
-
-/*_strcspn://R1 STR1 R3 STR 2
-
-
-    BX LR*/
 
