@@ -21,7 +21,7 @@
 .balign 4
     testInt: .asciz "%d"
 .balign
-    mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - char at\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - lastcharat\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n\nEscolha uma opção: "
+    mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - strchr\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - strrchr\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n\nEscolha uma opção: "
 
 /*
 INVERT STRING VARIABLES
@@ -44,18 +44,18 @@ STRING LENGTH VARIABLES
     resultToLength: .asciz "O tamanho da sua string é de: %d%s"
 
 /*
-CHAR AT VARIABLES
+STRCHR VARIABLES
  */
 .balign 4
-    charToSearchCharAt: .fill 1, 1, 0
+    charToSearchStrChr: .fill 1, 1, 0
 .balign 4
-    stringToSearchCharAt: .fill 100, 1, 0
+    stringToSearchStrChr: .fill 100, 1, 0
 .balign 4
-    insertCharCharAt: .asciz "Insira um carater para ser pesquisado na string: "
+    insertCharStrChr: .asciz "Insira um carater para ser pesquisado na string: "
 .balign 4
-    insertStringCharAt: .asciz "Insira uma string: "
+    insertStringStrChr: .asciz "Insira uma string: "
 .balign 4
-    resultCharAt: .asciz "O carater foi encontrado na posição: %d \n"
+    resultStrChr: .asciz "O carater foi encontrado na posição: %d \n"
 
 /*
 MEMCHR VARIABLES
@@ -137,17 +137,17 @@ STRXFRM VARIABLES
 .balign 4
     insertIntLimiterStrXfrm: .fill 50, 1, 0
 .balign 4
-    resultStrXfrm: .asciz "Resultado: '%s', e o tamanho da primeira string enviada é de: %d\n"
+    resultStrXfrm: .asciz "Resultado: '%s', e o tamanho da segunda string enviada é de: %d\n"
 
 /*
-LASTCHARAT VARIABLES
+STRRCHR VARIABLES
  */
 .balign 4
-    insertStringSearchLastCharAt: .fill 100, 1, 0
+    insertStringSearchStrrChr: .fill 100, 1, 0
 .balign 4
-    insertCharLastCharAt: .fill 1, 1, 0
+    insertCharStrrChr: .fill 1, 1, 0
 .balign 4
-    resultLastCharAt: .asciz "O carater foi encontrado pela última vez na posição: %d \n"
+    resultStrrChr: .asciz "O carater foi encontrado pela última vez na posição: %d \n"
 
 /*
 UPPERCASE VARIABLES
@@ -177,7 +177,7 @@ STRSET VARIABLES
 .balign 4
     insertStringStrSet: .fill 100, 1, 0
 .balign 4
-    resultStrSet: .asciz "Resultado: %s"
+    resultStrSet: .asciz "Resultado: %s\n"
 
 /*
 MEMSET VARIABLES
@@ -232,7 +232,7 @@ main:
     //-------------- CALL CHAR AT
 
     CMP R0, #3
-    BLEQ _callCharAt
+    BLEQ _callStrChr
 
     //------------ CALL MEMCHR
 
@@ -266,9 +266,9 @@ main:
 
 
 
-    //---------- LASTCHARAT
+    //---------- STRRCHR
     CMP R0, #10
-    BLEQ _callLastCharAt
+    BLEQ _callStrrChr
 
 
     //---------- STRXFRM
@@ -289,20 +289,13 @@ main:
     CMP R0, #14
     BLEQ _callStrSet
 
+
+    //------- MEMCMP
     CMP R0, #15
     BLEQ _callMemCmp
 
 
     POP {LR}
-
-    /*PUSH {LR}
-    LDR R0, =scanMenuInput
-    LDR R1, =inputOption
-    BL scanf
-
-    LDR R0, =inputOption
-    BL printf
-    POP {LR}*/
     
 
 
@@ -311,26 +304,6 @@ main:
 _exit: 
     MOV R7, #1
     SVC #0 @Invoke Syscall
-
-/*_callInvertString:
-    PUSH {LR}
-    LDR R0, =stringInvert@Ler a string
-    MOV R1, R0
-    BL _strlen//CALCULAR TAMANHO DA STRING EM R00
-    LDR R1, =emptyStrInvert//Ler string vaiza*/
-    /*
-        Parametros:
-        R0 - String a ser invertida
-        R1 - String vazia    
-        RETURN 
-        R1 - string invertida
-     */
-    /*
-    BL _invertString
-    MOV R0, R1
-    BL printf
-    POP {LR}
-    BX LR*/
 
 _callInvertString:
     PUSH {R0, LR}
@@ -365,37 +338,33 @@ _callStringLength:
     BL _strlen
     LDR R0, =resultToLength
     MOV R1, R2
-    //LDR R0, =inputOption
-    /*LDRB R3, [R1, #0]
-    MOV R1, R3*/
-    //MOV R0, R1
     LDR R2, =newLine
     BL printf
     POP {R0, LR}
 BX LR
 
 
-_callCharAt:
+_callStrChr:
     PUSH {R0, LR}
     LDR  R0, =insertChar
     BL printf
 
     LDR R0, =scanInputString
-    LDR R1, =charToSearchCharAt
+    LDR R1, =charToSearchStrChr
     BL scanf
 
     LDR  R0, =insertString
     BL printf
 
     LDR R0, =scanInputString
-    LDR R1, =stringToSearchCharAt
+    LDR R1, =stringToSearchStrChr
     BL scanf
     
-    LDR R1, =stringToSearchCharAt
-    LDR R3, =charToSearchCharAt
-    BL _charat
+    LDR R1, =stringToSearchStrChr
+    LDR R3, =charToSearchStrChr
+    BL _strchr
     MOV R1, R0
-    LDR R0, =resultCharAt
+    LDR R0, =resultStrChr
     BL printf
     POP {R0, LR}
 BX LR
@@ -419,7 +388,7 @@ _callMemChr:
     LDR R1, =insertStringMemChr
     LDR R3, =insertCharMemChr
     
-    BL _charat
+    BL _strchr
     BL _strlen
 
     LDR R1, =insertStringMemChr
@@ -620,27 +589,27 @@ _callStrXfrm:
 BX LR
 
 
-_callLastCharAt:
+_callStrrChr:
     PUSH {R0, LR}
     LDR R0, =insertString
     BL printf
 
     LDR R0, =scanInputString
-    LDR R1, =insertStringSearchLastCharAt
+    LDR R1, =insertStringSearchStrrChr
     BL scanf
 
     LDR R0, =insertChar
     BL printf
 
     LDR R0, =scanInputString
-    LDR R1, =insertCharLastCharAt
+    LDR R1, =insertCharStrrChr
     BL scanf
 
-    LDR R1, =insertStringSearchLastCharAt
-    LDR R2, =insertCharLastCharAt
-    BL _lastcharat
+    LDR R1, =insertStringSearchStrrChr
+    LDR R2, =insertCharStrrChr
+    BL _strrchr
     MOV R1, R0
-    LDR R0, =resultLastCharAt
+    LDR R0, =resultStrrChr
     BL printf
     POP {R0, LR}
 BX LR
@@ -798,15 +767,15 @@ _strlen:
     Retun
     R0 - a ocorrencia do carater
  */
-_charat:
+_strchr:
     MOV R4, #0//iterador
 
-    iterate_loop:
+    strchr_loop:
         LDRB R5, [R1, R4]//ler a string onde vai ser pesquisado o charter
         LDRB R6, [R3, #0]//o carater
         ADD R4, R4, #1//incrementar
         CMP R5, R6//comparar ate encontrar igual
-        BNE iterate_loop
+        BNE strchr_loop
         SUB R4, R4, #1
         MOV R0, R4//retornar a posicao
     BX LR
@@ -967,17 +936,17 @@ BX LR
     Return
     R0 - posição da ultima vez que encontrou o carater
  */
-_lastcharat:
+_strrchr:
     MOV R4, #0//iterador
 
-    lastcharat_loop:
+    strrchr_loop:
         LDRB R3, [R1, R4]//ler a string onde vai ser pesquisado o charter
         LDRB R6, [R2, #0]//o carater
         ADD R4, R4, #1//incrementar
         CMP R3, R6//comparar ate encontrar igual
         MOVEQ R5, R4
         CMP R3, #0
-        BNE lastcharat_loop
+        BNE strrchr_loop
         SUB R5, #1
         MOV R0, R5//retornar a posicao
     BX LR
