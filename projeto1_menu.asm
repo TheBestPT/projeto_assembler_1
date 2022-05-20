@@ -858,13 +858,13 @@ _strchr:
     MOV R4, #0//iterador
 
     strchr_loop:
-        LDRB R5, [R1, R4]//ler a string onde vai ser pesquisado o charter
-        LDRB R6, [R3, #0]//o carater
-        ADD R4, R4, #1//incrementar
-        CMP R5, R6//comparar ate encontrar igual
+        LDRB R5, [R1, R4]       //ler a string onde vai ser pesquisado o charter
+        LDRB R6, [R3, #0]       //o carater
+        ADD R4, R4, #1      //incrementar
+        CMP R5, R6      //comparar ate encontrar igual
         BNE strchr_loop
         SUB R4, R4, #1
-        MOV R0, R4//retornar a posicao
+        MOV R0, R4      //retornar a posicao
     BX LR
 
 /*  MEMCHR - basicamente um substring sem limite final
@@ -879,16 +879,16 @@ _strchr:
 _memchr:
     PUSH {LR}
     //SUB R0, #2
-    MOV R4, R0//posicao do carater encontrado
-    MOV R6, #0
+    MOV R4, R0      //posicao do carater encontrado
+    MOV R6, #0      //  iterrador
     iterate_memchr:
-        LDRB R5, [R1, R4]
-        STRB R5, [R3, R6]
-        ADD R4, #1
-        ADD R6, #1
-        CMP R4, R2
-        BNE iterate_memchr
-        MOV R0, R3
+        LDRB R5, [R1, R4]  // ler o bite da string do utilizador no lugar defenido pelo input 
+        STRB R5, [R3, R6]   
+        ADD R4, #1    
+        ADD R6, #1       //  soma +1 para os iterradores
+        CMP R4, R2      //   verifica se o iterrador ja chegou ao comprimento da string
+        BNE iterate_memchr //    repete o loop caso o length > iterrador
+        MOV R0, R3         //     move o resultado para o endereço correto
     POP {LR}
     BX LR
 
@@ -903,12 +903,12 @@ _memchr:
 _memmove:
     MOV R4, #0//Iterador
     memmove_loop:
-        LDRB R5, [R3, R4]
+        LDRB R5, [R3, R4]       // ler o bite da string do utilizador no lugar defenido pelo input
         STRB R5, [R1, R4]
-        ADD R4, #1
-        CMP R4, R2
-        BNE memmove_loop
-        MOV R0, R1
+        ADD R4, #1              //   soma +1 para os iterradores
+        CMP R4, R2              //    compara o tamanho da string com o iterrador
+        BNE memmove_loop        //     caso nao correspode repete o loop
+        MOV R0, R1              //      move o resultado para o endereço correto
     BX LR
 
 /*  STRCMP - Compara str1 a str2 e devolve 1 para igausi 2 para diferentes 3 para strings de diferentes maneiras
@@ -922,33 +922,33 @@ _memmove:
  */
 _strcmp: 
     PUSH {R0, LR}
-    LDR R1, =insertStringSecundaryToCompare
-    BL _strlen
-    MOV R6, R2//STR2
-    LDR R1, =insertStringPrimaryToCompare
-    BL _strlen
-    MOV R3, R2//STR1
-    CMP R3, R6
+    LDR R1, =insertStringSecundaryToCompare // inserir a string
+    BL _strlen                              //  calcular o tamanho da mesma 
+    MOV R6, R2//STR2                        // mover o comprimento da string para outro registro  
+    LDR R1, =insertStringPrimaryToCompare   // inserir a string
+    BL _strlen                              //  calcular o tamanho da mesma 
+    MOV R3, R2//STR1                        // mover o comprimento da string para outro registro
+    CMP R3, R6                              // comparar o tamanho das duas strings
     MOVNE R1, #3//STRINGS TAMANHOS DIFERENTES
-    //MOV R0, R6
     POP {R0, LR}
-    BXNE LR
+    BXNE LR                                 // TERMINAR NO CASO DE TAMANHOS DIFERENTES
     PUSH {R0, LR}
-    MOV R4, #0
+    MOV R4, #0                              // Iniciar o iterrador
+    // selecionar os endereços das strings
     LDR R1, =insertStringPrimaryToCompare
     LDR R5, =insertStringSecundaryToCompare
     iterate_cmp_loop:
-        CMP R2, R4
-        MOVEQ R1, #1
+        CMP R2, R4               // compara o tamanho da string com o iterrador
+        MOVEQ R1, #1            //  ignorar o resto do codigo caso o tamanho da string é 0
         POP {R0, LR}
         BXEQ LR
         PUSH {R0, LR}
-        LDRB R6, [R1, R4]
+        LDRB R6, [R1, R4]       // le o mesmo bit as duas strings
         LDRB R3, [R5, R4]
-        CMP R6, R3 
-        ADDEQ R4, R4, #1
-        BEQ iterate_cmp_loop
-        MOV R1, #2
+        CMP R6, R3              //   compara os bits selecionados
+        ADDEQ R4, R4, #1        //    caso seijam iguais adiciona +1 ao iterrador
+        BEQ iterate_cmp_loop    //     e repete o loop
+        MOV R1, #2              //      CASO R0 = 3 - ERRO , tamanho diferente das strings; CASO R0 = 2 - fim da funçao ; CASO R0 = 1 - ERRO , tamanho das strings é 0 
     POP {R0, LR}
     BX LR
 
@@ -966,12 +966,12 @@ _strcmp:
 _memset:
     MOV R4, #0//Iterador
     memset_loop:
-        LDRB R5, [R1, #0]
+        LDRB R5, [R1, #0]   // ler o bite da string do utilizador no lugar defenido pelo input
         STRB R5, [R3, R4]
-        ADD R4, #1
-        CMP R4, R2//R2 ate onde substituir
-        BNE memset_loop
-        MOV R0, R3
+        ADD R4, #1          //   adicionar +1 ao iterrador
+        CMP R4, R2          //R2 ate onde substituir
+        BNE memset_loop     //     caso nao seijam iguais repete o loop
+        MOV R0, R3          //      passa o resultado para o registro correto
 BX LR
 
 /*  STRCAT - concatenar duas strings  
@@ -994,8 +994,8 @@ _strcat:
     LDR R1, =insertStringSecondeStrCat
     MOV R6, R2
     strcat_loop:
-        LDRB R3, [R1, R0]//o Francisco
-        STRB R3, [R5, R4]//tudo bem?
+        LDRB R3, [R1, R0]
+        STRB R3, [R5, R4]
         ADD R4, #1
         ADD R0, #1
         CMP R0, R6//R2 ate onde substituir
@@ -1018,10 +1018,10 @@ _strcpy:
     strpy_loop:
         LDRB R5, [R3, R4]
         STRB R5, [R1, R4]
-        ADD R4, #1
-        CMP R4, R2
-        BNE strpy_loop
-        MOV R0, R1
+        ADD R4, #1          // +1 para ler o proximo bite
+        CMP R4, R2          //  compara o indice do ultimo bite e o limite defenido pelo input
+        BNE strpy_loop      //   se ainda nao chegou ao limite o loop repete se
+        MOV R0, R1          //    move para o registro correto
 BX LR
 
 /*  STRRCHR - Damos uma string e pesquisa na string a última ocorrencia desse carater
@@ -1036,15 +1036,15 @@ _strrchr:
     MOV R4, #0//iterador
 
     strrchr_loop:
-        LDRB R3, [R1, R4]//ler a string onde vai ser pesquisado o charter
-        LDRB R6, [R2, #0]//o carater
-        ADD R4, R4, #1//incrementar
-        CMP R3, R6//comparar ate encontrar igual
+        LDRB R3, [R1, R4]       //ler a string onde vai ser pesquisado o charter
+        LDRB R6, [R2, #0]       //o carater
+        ADD R4, R4, #1          //incrementar
+        CMP R3, R6              //comparar ate encontrar igual
         MOVEQ R5, R4
         CMP R3, #0
         BNE strrchr_loop
         SUB R5, #1
-        MOV R0, R5//retornar a posicao
+        MOV R0, R5               //retornar a posicao
     BX LR
 
 /*  STRXFRM - Copia a str1 para str2 ate um certo limite e ainda devolve o tamanho da segunda str2
@@ -1063,12 +1063,12 @@ _strxfrm://R1 string a ser replaced R5 string que vai ser replaced R0 limite de 
     strxfrm_loop:
         LDRB R5, [R3, R4]
         STRB R5, [R1, R4]
-        ADD R4, #1
-        CMP R4, R2
-        BNE strxfrm_loop
-        MOV R0, R1
+        ADD R4, #1          //+1 para o ler o proximo bite 
+        CMP R4, R2          // compara o comprimento dastring com o limite posto
+        BNE strxfrm_loop    //  repete se ainda nao chegou ao limite
+        MOV R0, R1          //   move o resultado para o lugar correspondente
         MOV R1, R3
-        BL _strlen
+        BL _strlen          //     ve o comprimento da string resultante
         MOV R3, R2
     POP {LR}
     BX LR
@@ -1087,9 +1087,10 @@ _uppercase:
     uppercase_loop:
         LDRB R5, [R3, R4]
         LDRB R6, [R1, R4] 
-        CMP R6, #32//ESPAÇO
-        SUBNE R6, #32//TRANSFORMAR EM UPPERCASE
-        CMP R6, #64
+        CMP R6, #32         // verifica se o cahr se o char q foi lido nao é o ESPAÇO
+        SUBNE R6, #32       // ADICIONA 32 PARA TRANSFORMAR EM LOWERCASE (caso nao é um ESPAÇO)
+        //Verifica se esta em o carater ja estava em uppercase se sim voltar atras
+        CMP R6, #64         
         ADDLT R6, #32
         STRB R6, [R3, R4]
         CMP R4, R2
@@ -1114,6 +1115,7 @@ _lowercase:
         LDRB R6, [R1, R4]
         CMP R6, #32//ESPAÇO
         ADDNE R6, #32//TRANSFORMAR EM UPPERCASE
+        //Verifica se esta em o carater ja estava em lowercase se sim voltar atras
         CMP R6, #123
         SUBGT R6, #32
         STRB R6, [R3, R4]
@@ -1159,12 +1161,12 @@ _memcmp:
     PUSH {R0, LR}
     
     LDR R1, =insertStringSecondMemCmp
-    BL _strlen
-    MOV R6, R2//STR2
-    LDR R1, =insertStringFirstMemCmp
-    BL _strlen
-    MOV R3, R2//STR1
-    CMP R3, R6
+    BL _strlen  // ler o comprimento da 2a string
+    MOV R6, R2//STR2        // move o comprimento para outra variavel
+    LDR R1, =insertStringFirstMemCmp    
+    BL _strlen// ler o comprimento da 1a string
+    MOV R3, R2//STR1        // move o comprimento para outra variavel
+    CMP R3, R6      // compara o comprimento das 2as
     MOVNE R1, #3//STRINGS TAMANHOS DIFERENTES
     //MOV R0, R6
     POP {R0, LR}
@@ -1174,7 +1176,7 @@ _memcmp:
     LDR R1, =insertStringFirstMemCmp
     LDR R5, =insertStringSecondMemCmp
     memcmp_loop:
-        CMP R7, R4
+        CMP R7, R4  // compara o iterrador com o limite posto
         MOVEQ R1, #1
         POP {R0, LR}
         BXEQ LR
@@ -1223,12 +1225,12 @@ _capitalize:
        
 
     capitalize_loop:
-        LDRB R5, [R1, R4]
-        CMP R4, #0
+        LDRB R5, [R1, R4] // pega no 1o bite da string dada
+        CMP R4, #0          //  verifica se nao é nula
         SUBEQ R5, #32
         CMP R5, #64
         ADDEQ R5, #32
-        STRB R5, [R3, R4]
+        STRB R5, [R3, R4]   // substitui a letra capitalizada na string
         ADD R4, #1
         CMP R4, R2
         BNE capitalize_loop
