@@ -781,7 +781,7 @@ _callCharAt:
 BX LR 
 
 _callCapitalize:
-    PUSH {LR}
+    PUSH {R0, LR}
     LDR R0, =insertString
     BL printf
 
@@ -797,7 +797,7 @@ _callCapitalize:
     MOV R1, R0
     LDR R0, =resultCapitalize
     BL printf
-    POP {LR}
+    POP {R0, LR}
 BX LR
 
 //---------------------------------------------------------------------------------------------
@@ -1124,7 +1124,7 @@ _lowercase:
 BX LR
 
 
-/*  STRSET - Substitui todos os carateres da str1 por um carater a esolha
+/*  STRSET - Substitui todos os carateres da str1 por um carater a escolha
 
     Parametros:
     R1 - carater para substituir
