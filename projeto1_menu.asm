@@ -510,7 +510,7 @@ _callMemSet:
     LDR R1, =insertCharMemSet
     LDR R2, =insertIntMemSet
     LDRB R2, [R2, #0]
-    LDR R3, =insertStringMemChr
+    LDR R3, =insertStringMemSet
     BL _memset
     BL printf
     POP {R0, LR}
