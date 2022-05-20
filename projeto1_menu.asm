@@ -21,7 +21,7 @@
 .balign 4
     testInt: .asciz "%d"
 .balign
-    mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - strchr\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - strrchr\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n\nEscolha uma opção: "
+    mainMenu: .asciz "Menu\n1 - string length\n2 - invert string\n3 - strchr\n4 - memchr\n5 - memmove\n6 - strcmp\n7 - memset\n8 - strconcat\n9 - strcpy\n10 - strrchr\n11 - strxfrm\n12 - uppercase\n13 - lowercase\n14 - strset\n15 - memcmp\n16 - charat\n17 - capitalize\n\nEscolha uma opção: "
 
 /*
 INVERT STRING VARIABLES
@@ -191,6 +191,30 @@ MEMSET VARIABLES
 .balign 4
     resultMemCmp: .asciz "Resultado: %d (3) - tamanhos diferentes, (2) - diferentes, (1) - iguais\n"
 
+/*
+CHARAT VARIABLES
+ */
+.balign 4
+    insertStringCharAt: .fill 100, 1, 0
+.balign 4
+    insertIntIndexCharAt: .fill 50, 1, 0
+.balign 4
+    empetyCharCharAt: .fill 1, 1, 0
+.balign 4
+    resultCharAt: .asciz "O carater encontrado é: %s\n"
+.balign 4
+    indexNotFoundCharAt: .asciz "carater não encontrado"
+
+/*
+CAPITALIZE VARIABLES
+ */
+
+.balign 4
+    insertStringCapitalize: .fill 100, 1, 0
+.balign 4
+    empetyStrCapitalize: .fill 100, 1, 0
+.balign 4
+    resultCapitalize: .asciz "Resultado: %s\n"
 
 @External C functions
 
@@ -293,6 +317,16 @@ main:
     //------- MEMCMP
     CMP R0, #15
     BLEQ _callMemCmp
+
+    //------ CHARAT
+    CMP R0, #16
+    BLEQ _callCharAt
+
+    //---- CAPITALIZE
+    CMP R0, #17
+    BLEQ _callCapitalize
+
+
 
 
     POP {LR}
@@ -716,6 +750,56 @@ _callMemCmp:
     POP {R0, LR}
 BX LR   
 
+
+_callCharAt:
+    PUSH {R0, LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringCharAt
+    BL scanf
+
+    LDR R0, =insertInt
+    BL printf
+
+    LDR R0, =scanInputInt
+    LDR R1, =insertIntIndexCharAt
+    BL scanf
+
+    LDR R1, =insertStringCharAt
+    LDR R2, =empetyCharCharAt
+    LDR R3, =insertIntIndexCharAt
+    LDRB R3, [R3, #0]
+    BL _charat
+    MOV R1, R0
+    LDR R0, =resultCharAt
+    BL printf
+
+
+    POP {R0, LR}
+BX LR 
+
+_callCapitalize:
+    PUSH {LR}
+    LDR R0, =insertString
+    BL printf
+
+    LDR R0, =scanInputString
+    LDR R1, =insertStringCapitalize
+    BL scanf
+
+    LDR R1, =insertStringCapitalize
+    BL _strlen
+    LDR R3, =empetyStrCapitalize
+
+    BL _capitalize
+    MOV R1, R0
+    LDR R0, =resultCapitalize
+    BL printf
+    POP {LR}
+BX LR
+
 //---------------------------------------------------------------------------------------------
 
 //METHODS
@@ -867,6 +951,8 @@ _strcmp:
         MOV R1, #2
     POP {R0, LR}
     BX LR
+
+
 
 
 /*  MEMSET - substitui na str1 com a str2 ate um certo limite dado
@@ -1101,3 +1187,51 @@ _memcmp:
         MOV R1, #2
     POP {R0, LR}
     BX LR
+
+/* CHARAT - com o charat e possivel retornar um carater a partir de um indice numa string
+
+    Parametros:
+    R1 - string
+    R3 - indice
+
+    Return:
+    R0 - carater 
+
+ */
+_charat:
+    LDRB R5, [R1, R3]
+    CMP R5, #0
+    LDR R0, =indexNotFoundCharAt
+    BXEQ LR
+    STRB R5, [R2, #0]
+    MOV R0, R2
+BX LR
+
+
+/* CAPITALIZE - basicamente um metodo simples que formata a string para que o primeiro carater esteja em uppercase
+
+    Parametros:
+    R1 - string 
+    R3 - string vazia
+
+    Return
+    R0 - string formatada
+
+ */
+_capitalize:
+    MOV R4, #0
+       
+
+    capitalize_loop:
+        LDRB R5, [R1, R4]
+        CMP R4, #0
+        SUBEQ R5, #32
+        CMP R5, #64
+        ADDEQ R5, #32
+        STRB R5, [R3, R4]
+        ADD R4, #1
+        CMP R4, R2
+        BNE capitalize_loop
+        MOV R0, R3
+BX LR
+

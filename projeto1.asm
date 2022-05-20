@@ -44,6 +44,8 @@
     stringCatWithFill: .fill 50, 1, 0
 .balign 4
     bigStr: .asciz "Ola tudo bem isto é uma string de testes"
+.balign 4
+    indexNotFoundCharAt: .asciz "carater não encontrado"
 
 
 .global printf
@@ -191,13 +193,30 @@ main:
     BL _printString*/
 
     //----------------- MEMCMP
-    LDR R1, =str
+    /*LDR R1, =str
     LDR R5, =stringToCompare
     //MOV R0, #0
     MOV R7, #4
     //BL _printString
     BL _memcmp
-    MOV R7, #0
+    MOV R7, #0*/
+
+    //--------------- CHARAT 
+    /*LDR R1, =str
+    LDR R2, =empetyStr
+    MOV R3, #4
+    BL _charat*/
+
+    //-------------- CAPITALIZE
+    /*LDR R1, =str
+    BL _strlen
+    LDR R3, =empetyStr
+    BL _capitalize
+    MOV R1, R0
+    BL _printString*/
+
+
+    
     
 
 
@@ -608,3 +627,49 @@ _memcmp:
     POP {LR}
     BX LR
 
+/* CHARAT - com o charat e possivel retornar um carater a partir de um indice numa string
+
+    Parametros:
+    R1 - string
+    R3 - indice
+
+    Return:
+    R0 - carater 
+
+ */
+_charat:
+    LDRB R5, [R1, R3]
+    CMP R5, #0
+    LDR R0, =indexNotFoundCharAt
+    BXEQ LR
+    STRB R5, [R2, #0]
+    MOV R0, R2
+BX LR
+
+
+/* CAPITALIZE - basicamente um metodo simples que formata a string para que o primeiro carater esteja em uppercase
+
+    Parametros:
+    R1 - string 
+    R3 - string vazia
+
+    Return
+    R0 - string formatada
+
+ */
+_capitalize:
+    MOV R4, #0
+       
+
+    capitalize_loop:
+        LDRB R5, [R1, R4]
+        CMP R4, #0
+        SUBEQ R5, #32
+        CMP R5, #64
+        ADDLT R5, #32
+        STRB R5, [R3, R4]
+        ADD R4, #1
+        CMP R4, R2
+        BNE capitalize_loop
+        MOV R0, R3
+BX LR
